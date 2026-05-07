@@ -59,5 +59,3 @@ Every markdown file you create in Phase 2 MUST follow this exact structure:
   * **Impl (GREEN):** [Implementation requirement]
   * **CHECKPOINT:** `git commit -m "feat: [describe the checkpoint]"`
 </output_format>
-
-Begin execution now.
