@@ -1,6 +1,6 @@
 ---
 name: be-to-fe-handoff
-description: Analyzes git diffs on the active branch and generates parallelizable frontend integration guides per feature. Use when handing off backend API changes to a frontend team. Triggers: create FE handoff docs.
+description: Analyzes git diffs on the active branch and generates parallelizable frontend integration guides per feature. Use when handing off backend API changes to a frontend team.
 ---
 
 <system_role>
