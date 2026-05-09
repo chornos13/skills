@@ -64,7 +64,13 @@ Every markdown file you create in Phase 2 MUST follow this exact structure. Repe
 ```
 
 ### 2. Required UI States to Handle
-[List the logical states the Frontend must account for, e.g., Idle, Loading, Empty State, Success, Validation Error, Not Found]
+List the logical states the Frontend must account for, e.g., Idle, Loading, Empty State, Success, Validation Error, Not Found
+[Format as a Markdown table]
+
+| State | Trigger |
+|---|---|
+| **Loading** | [What triggers this state] |
+| **Empty State** | [What triggers this state] |
 
 ### 3. Error Handling & Edge Cases Matrix
 * **Validation Errors (400/422):** 
@@ -76,7 +82,7 @@ Every markdown file you create in Phase 2 MUST follow this exact structure. Repe
 ### 4. Integration Checklist (Vertical Slices)
 Break the feature down into granular, endpoint-by-endpoint slices. Do not group multiple actions into one slice.
 * **Slice 1: [Specific behavior, e.g., List & Paginate]**
-  * **Test (RED):** [User-facing behavior to verify]
+  * **Test (RED):** [User-facing behavior to verify, Describe as a user story: e.g., "User visits page → clicks button → sees X"]
   * **Impl (GREEN):** [Implementation requirement]
   * **CHECKPOINT:** `git commit -m "feat: [describe the checkpoint]"`
 </output_format>
