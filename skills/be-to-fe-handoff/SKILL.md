@@ -32,6 +32,7 @@ Once all files are written, output a brief summary to the console listing the fi
 <constraints>
 - RESOLVE FULL PATHS: You must document the absolute HTTP path including all global prefixes. Do not document partial paths like `/messages` if the router is mounted under `/api/v1/chat/messages`.
 - NO HALLUCINATED JSON OR WRAPPERS: Do not guess JSON structures from partial diffs. Pay special attention to response wrappers for lists/objects (e.g., do not guess `{"items": [...]}` if the codebase actually uses `{"data": [...]}`). You must find the exact base response model, wrapper class, or pagination struct used by the endpoint's return type to guarantee 100% accuracy.
+- EXHAUSTIVE DETAILS: You must extract all Query Parameters, Path Parameters, and field-level Validation Rules (e.g., required fields, regex, max length) discovered in the code and document them.
 - FOCUS ON API SURFACE: If an internal BE change does not affect the HTTP request/response, do NOT document it.
 - ISOLATION: Each markdown file MUST only contain information relevant to its specific feature. Do not bleed context between files.
 - NO FE CODE: Do not write any frontend JS/TS/React code in the guides.
@@ -39,32 +40,42 @@ Once all files are written, output a brief summary to the console listing the fi
 </constraints>
 
 <output_format>
-Every markdown file you create in Phase 2 MUST follow this exact structure:
+Every markdown file you create in Phase 2 MUST follow this exact structure. Repeat the sub-sections under "1. API Contract" for every endpoint in the feature.
 
 # Feature: [Feature Name]
 
 ### 1. API Contract
+
+#### [Endpoint Name/Action, e.g., List Studio Definitions]
 * **Endpoint:** `[HTTP METHOD] [EXACT FULL PATH INCLUDING ALL PREFIXES]`
-* **Auth/Headers Required:** [Identify from middleware, e.g., Bearer Token, API Key]
+* **Auth/Headers Required:** [Identify from middleware, e.g., Bearer Token, Admin Role]
+* **Path Params:** [List any path parameters and their types]
+* **Query Params:** [List any query parameters, types, and if they are optional/required. Format as a Markdown Table.]
 * **Request Payload (JSON):** 
 ```json
-[Complete, accurate JSON example based on the full schema, with // comments for required/optional fields]
+[Complete, accurate JSON example based on the full schema]
 ```
+> **Validation Rules:**
+> - [List any field-level constraints found in the schema: e.g., max length, regex, required vs optional, enums]
+
 * **Success Response (JSON):** 
 ```json
 [Complete JSON example of the 2xx response, utilizing the EXACT wrapper model found in the codebase]
 ```
 
 ### 2. Required UI States to Handle
-[List the logical states the Frontend must account for, e.g., Idle, Loading, Success, Validation Error]
+[List the logical states the Frontend must account for, e.g., Idle, Loading, Empty State, Success, Validation Error, Not Found]
 
 ### 3. Error Handling & Edge Cases Matrix
-* **Validation Errors (400/422):** [Exact JSON error structure returned by the framework]
+* **Validation Errors (400/422):** 
+[Provide exhaustive JSON examples of validation errors the server might return for invalid fields]
+* **Conflict / Business Errors (409/400):** [Expected behavior and JSON for business logic violations]
 * **Auth Errors (401/403):** [Expected behavior]
-* **Business Logic Edge Cases:** [Specific edge cases or error codes found in the service logic]
+* **Business Logic Edge Cases:** [Specific edge cases or side-effects found in the service logic (e.g., "Deleting this nullifies related records")]
 
 ### 4. Integration Checklist (Vertical Slices)
-* **Slice 1: [Name of behavior]**
+Break the feature down into granular, endpoint-by-endpoint slices. Do not group multiple actions into one slice.
+* **Slice 1: [Specific behavior, e.g., List & Paginate]**
   * **Test (RED):** [User-facing behavior to verify]
   * **Impl (GREEN):** [Implementation requirement]
   * **CHECKPOINT:** `git commit -m "feat: [describe the checkpoint]"`
