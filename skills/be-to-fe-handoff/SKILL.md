@@ -107,3 +107,85 @@ Repeat the subsections under "1. API Contract" for every endpoint in the feature
 {
   "field": "example_value"
 }
+```
+
+> **Validation Rules:**
+> - `field` — required, enum: `"value_a"` | `"value_b"`. Any other value returns 422.
+> - [One rule per bullet. Cover: required vs optional, enums, max length, regex, type constraints.]
+
+- **Success Response — HTTP [2xx status]:**
+
+```json
+{
+  "field": "example_value"
+}
+```
+
+> [Note any fields that are `null` until a certain state is reached, or any ordering guarantees.]
+
+---
+
+### 2. Required UI States
+
+| State | Endpoint | Trigger |
+|---|---|---|
+| **Loading** | `POST /example` | Request in-flight |
+| **Empty State** | `GET /example` | Response returns `[]` |
+| **Success** | `GET /example` | `status === "completed"` |
+| **Failed** | `GET /example` | `status === "failed"` |
+| **Unauthenticated** | All | 401 response |
+
+---
+
+### 3. Error Handling & Edge Cases
+
+For each error, the endpoint column specifies where it can occur.
+
+#### Validation Errors (422)
+
+| Error | Endpoint | Response Body |
+|---|---|---|
+| [Description] | `POST /example` | See below |
+
+```json
+{
+  "detail": "..."
+}
+```
+
+> [Note if `detail` is a string vs a structured object — these require different FE handling.]
+
+#### Not Found (404)
+
+| Error | Endpoint | Response Body |
+|---|---|---|
+| [Description] | `GET /example/{id}` | `{"detail": "..."}` |
+
+#### Auth Errors (401/403)
+
+| Error | Endpoint | Behavior |
+|---|---|---|
+| Session expired | All | `{"detail": "..."}` — redirect to login |
+
+#### Business Logic Edge Cases
+
+- **[Edge case name]** — *(Endpoint: `POST /example`)* [Description of the side effect or constraint the FE must handle.]
+
+---
+
+### 4. Integration Checklist (Vertical Slices)
+
+Break the feature into granular, one-endpoint-per-slice steps.
+
+#### Slice 1: [Specific behavior]
+- **Test (RED):** User story — "User does X → sees Y"
+- **Impl (GREEN):** [What must be built to pass the test]
+- **CHECKPOINT:** `git commit -m "feat: [description]"`
+
+#### Slice 2: [Next specific behavior]
+- **Test (RED):** ...
+- **Impl (GREEN):** ...
+- **CHECKPOINT:** `git commit -m "feat: [description]"`
+
+---
+</output_format>
