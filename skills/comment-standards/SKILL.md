@@ -1,6 +1,6 @@
 ---
 name: comment-standards
-description: Use when reviewing or writing code comments — enforces why-not-what and name-over-comment. Examples: PR review, inline comment in complex logic, refactoring guidance.
+description: "Use when reviewing or writing code comments — enforces why-not-what and name-over-comment. Examples: PR review, inline comment in complex logic, refactoring guidance."
 ---
 
 Read the rules below, apply them as hard constraints, then handle the user's request.
