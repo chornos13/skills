@@ -23,6 +23,14 @@ Comments are a last resort, not a default. Simplify the code first.
 
 Don't write comments that restate the code. They add noise without adding information.
 
+### Comment as Smell: The Restructuring Signal
+
+**A comment that feels necessary is a signal to restructure, not a reason to keep it.**
+
+Before keeping any comment, ask: *could I restructure the surrounding code so this comment becomes unnecessary?* Section-label comments are the most common failure mode — they exist because the code lacks structure, not documentation. The fix is to tighten the structure until the label is redundant.
+
+Only when restructuring genuinely cannot make the intent clear should a comment survive.
+
 ### What Comments Must Do
 
 Comments should document:
