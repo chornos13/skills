@@ -149,6 +149,8 @@ After all files are written, print:
 
 - **CLASSIFY EVERY ENDPOINT:** Every endpoint header must carry a `[NEW]`, `[MODIFIED]`,
   or `[DEPRECATED]` badge derived from the Phase 1 diff-filter classification. Never omit it.
+
+- **NO HARDCODED STRINGS:** Explicitly instruct the FE to branch on HTTP status codes and structured error codes (e.g., `code: "VAULT_UNAVAILABLE"`), NEVER on human-readable literal text (e.g., `"Vault is unavailable"`). Whenever you document an error response, warn the reader against string-matching copy-edit material.
 </constraints>
 
 <output_format>
@@ -189,6 +191,8 @@ are found in the diff. If found, document them — FE cannot use the endpoint co
 ---
 
 ## 1. API Contract
+
+> **Note on examples:** JSON snippets below show response shape only. Human-readable strings (e.g. `detail`, `message`) are copy-edit material and can change without notice. Branch on HTTP status code and structured field names — never on the literal text.
 
 *(If an endpoint is strictly a non-HTTP transport such as WebSocket or a long-lived stream,
 omit the Request Payload and Success Response HTTP blocks for that endpoint and document all
@@ -325,7 +329,7 @@ For each error, the endpoint column specifies where it can occur.
 { "detail": "..." }
 ```
 
-> [Note if `detail` is a string vs a structured object — they require different FE handling.]
+> [Note if `detail` is a string vs a structured object. Explicitly warn the FE NOT to branch on the literal string text of `detail` or human-readable messages.]
 
 ### Not Found (404)
 
