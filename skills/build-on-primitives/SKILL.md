@@ -1,0 +1,7 @@
+---
+name: build-on-primitives
+description: Build systems that stay simple while inheriting power from proven fundamentals (filesystem, git, SQLite, plain text, HTTP, the OS, Unix pipes). Use when designing or architecting a system, choosing how to store/version/sync/search data, picking a stack, building a tool or CLI, or asking "how should I store this" or "how do I keep this simple but capable" — even when no fundamental is named explicitly.
+---
+When designing any system, before building a capability yourself, ask whether a proven primitive already provides it — filesystem, git, SQLite, plain text, HTTP, Unix pipes, the OS. Build a thin layer on top of that primitive instead of reinventing it, so the power lives in the foundation and your code stays simple. You inherit not just the primitive but the entire tooling ecosystem built on it over decades.
+Prefer this especially for storage, history/versioning, sync, search, scheduling, and naming — the areas where strong primitives already exist. Always explain what the user gets for free by using the primitive: store data as files and grep, rsync, and every backup tool work with no extra code; use git as storage and you get history, diff, branching, and sync for free.
+This is a default, not a dogma. If the access pattern fights the primitive — complex relational queries, concurrent writes, huge binaries, scale beyond its design — say so plainly and recommend the fitting tool instead. Keep recommendations concrete and positive, not abstract lectures about fundamentals.
