@@ -3,9 +3,6 @@ name: cut-over-pitchdeck
 description: Use when to make pitchdeck more realistic
 ---
 
-
-The Tiny “Over*” Pitchdeck Rules
-
 A strong pitch deck avoids doing too much.
 
 1. Don’t oversell
