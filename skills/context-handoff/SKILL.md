@@ -35,3 +35,5 @@ Your summary should be thorough and detailed. It will replace the context window
 
 Do not add any commentary or say anything other than the summary itself — output the summary directly.
 </important>
+
+after created the file, say "Done" is enough
