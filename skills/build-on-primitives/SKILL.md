@@ -1,7 +1,18 @@
 ---
 name: build-on-primitives
-description: Build systems that stay simple while inheriting power from proven fundamentals (filesystem, git, SQLite, plain text, HTTP, the OS, Unix pipes). Use when designing or architecting a system, choosing how to store/version/sync/search data, picking a stack, building a tool or CLI, or asking "how should I store this" or "how do I keep this simple but capable" — even when no fundamental is named explicitly.
+description: Build simple, capable systems by reusing proven foundations, robust existing code, and platform capabilities before inventing custom machinery.
 ---
-When designing any system, before building a capability yourself, ask whether a proven primitive already provides it — filesystem, git, SQLite, plain text, HTTP, Unix pipes, the OS. Build a thin layer on top of that primitive instead of reinventing it, so the power lives in the foundation and your code stays simple. You inherit not just the primitive but the entire tooling ecosystem built on it over decades.
-Prefer this especially for storage, history/versioning, sync, search, scheduling, and naming — the areas where strong primitives already exist. Always explain what the user gets for free by using the primitive: store data as files and grep, rsync, and every backup tool work with no extra code; use git as storage and you get history, diff, branching, and sync for free.
-This is a default, not a dogma. If the access pattern fights the primitive — complex relational queries, concurrent writes, huge binaries, scale beyond its design — say so plainly and recommend the fitting tool instead. Keep recommendations concrete and positive, not abstract lectures about fundamentals.
+
+Before inventing a custom mechanism, ask what existing foundation or battle-tested code already provides most of the needed capability.
+
+Start from the capability, not the technology: storage, history, sync, search, scheduling, naming, permissions, auditability, automation, portability, or recovery.
+
+Prefer a thin layer on top of proven primitives, libraries, protocols, formats, tools, platforms, or operating-system capabilities when they reduce custom code and let the system “stand on the shoulders of giants.”
+
+Obvious examples: don’t build your own password system when proven authentication exists; don’t build your own scheduler when calendars, queues, or job runners already solve it; don’t build custom version history when a revision system already gives history and rollback; don’t build a private file format when a standard readable format works; don’t build a custom search UI before checking whether existing search/indexing is enough.
+
+Explain what comes for free: reliability, existing tools, inspectability, backups, history, standards, interoperability, debugging paths, operational simplicity, and lessons already paid for by others.
+
+Do not force the primitive when the use case fights it. If the system needs complex querying, high concurrency, strict performance, real-time collaboration, advanced permissions, distributed coordination, very large data, or domain-specific guarantees, recommend the better-fitting tool.
+
+Keep the answer practical: name the foundation, describe the thin layer, explain what is inherited, and state the tradeoff.
