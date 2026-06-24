@@ -1,6 +1,6 @@
 ---
 name: comment-standards
-description: "Use when reviewing or writing code comments — enforces why-not-what and name-over-comment. Examples: PR review, inline comment in complex logic, refactoring guidance."
+description: "Use when reviewing or writing code comments — enforces why-not-what, name-over-comment, and systemic code smell detection. Examples: PR review, inline comments in complex logic, refactoring guidance."
 ---
 
 Read the rules below, apply them as hard constraints, then handle the user's request.
@@ -27,9 +27,21 @@ Don't write comments that restate the code. They add noise without adding inform
 
 **A comment that feels necessary is a signal to restructure, not a reason to keep it.**
 
-Before keeping any comment, ask: *could I restructure the surrounding code so this comment becomes unnecessary?* Section-label comments are the most common failure mode — they exist because the code lacks structure, not documentation. The fix is to tighten the structure until the label is redundant.
+Before approving any comment, test it against these four systemic smells. If it triggers one, **reject the comment and demand the structural escape hatch:**
 
-Only when restructuring genuinely cannot make the intent clear should a comment survive.
+1. **The Implicit State Machine:** If a comment has to explain a multi-variable matrix of competing conditional outcomes (*"If X happens while Y is true, but Z hasn't resolved..."*), the code is using scattered `if/else` checks to simulate an unwritten state machine. 
+   * *The Escape Hatch:* Reify the logic into an explicit State Resolver class, a deterministic lookup table, or a finite state machine.
+
+2. **The Hostage Test Case:** If a comment describes a specific sequence of user or system actions required to trigger/avoid a bug (*"...otherwise closing the side panel re-parks the wrong button"*), the comment is a hijacked regression test.
+   * *The Escape Hatch:* Delete the narrative from the implementation file. Write an automated integration test for that exact scenario, and use the explanation as the test's `it()` description.
+
+3. **The Missing Domain Noun:** If a comment relies on an internal, unwritten glossary of abstract concepts to make sense (*"ambient home", "armed set", "gating CTA"*), the Type System has failed to capture the domain model.
+   * *The Escape Hatch:* Turn the nouns into code. Reify the concepts into explicit `Interfaces`, `Enums`, or wrapped domain types.
+
+4. **The Volume Ceiling (The ADR Threshold):** Inline comments must be scannable at normal scrolling speeds. If explaining the "Why" requires more than three sentences of dense systemic causality, the component is too coupled to be documented in-situ.
+   * *The Escape Hatch:* Abstract the logic behind a well-named coordinator function, and move the essay to an Architecture Decision Record (ADR) or a linked `.md` file.
+
+Only when a comment passes all four checks—and the code genuinely cannot be refactored to speak for itself—should the prose survive.
 
 ### What Comments Must Do
 
