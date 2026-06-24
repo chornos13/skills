@@ -27,19 +27,19 @@ Don't write comments that restate the code. They add noise without adding inform
 
 **A comment that feels necessary is a signal to restructure, not a reason to keep it.**
 
-Before approving any comment, test it against these four systemic smells. If it triggers one, **reject the comment and demand the structural escape hatch:**
+Before approving any comment, test it against these four universal code smells. If it triggers one, **reject the comment and demand the structural escape hatch:**
 
-1. **The Implicit State Machine:** If a comment has to explain a multi-variable matrix of competing conditional outcomes (*"If X happens while Y is true, but Z hasn't resolved..."*), the code is using scattered `if/else` checks to simulate an unwritten state machine. 
-   * *The Escape Hatch:* Reify the logic into an explicit State Resolver class, a deterministic lookup table, or a finite state machine.
+1. **The Unwritten State Machine (State Explosion):** If a comment has to map out a matrix of overlapping booleans, order-of-operations, or race conditions (*"If X happens while Y is true, but Z hasn't resolved..."*), the code is using standard control flow to simulate a missing finite state machine.
+   * *The Escape Hatch:* Reify the permutations into a formal State pattern, a deterministic lookup table, or an explicit status reducer.
 
-2. **The Hostage Test Case:** If a comment describes a specific sequence of user or system actions required to trigger/avoid a bug (*"...otherwise closing the side panel re-parks the wrong button"*), the comment is a hijacked regression test.
-   * *The Escape Hatch:* Delete the narrative from the implementation file. Write an automated integration test for that exact scenario, and use the explanation as the test's `it()` description.
+2. **The Ghost Specification (The Misplaced Test):** If a comment outlines a step-by-step reproduction scenario or a historical edge case (*"...otherwise doing X causes Y to happen"*), it is an orphaned assertion masquerading as prose.
+   * *The Escape Hatch:* Delete the narrative from the source file. Write an automated test for that exact scenario, and use the prose as the test's title string. 
 
-3. **The Missing Domain Noun:** If a comment relies on an internal, unwritten glossary of abstract concepts to make sense (*"ambient home", "armed set", "gating CTA"*), the Type System has failed to capture the domain model.
-   * *The Escape Hatch:* Turn the nouns into code. Reify the concepts into explicit `Interfaces`, `Enums`, or wrapped domain types.
+3. **The Phantom Vocabulary (Missing Domain Types):** If a comment relies on an unwritten, off-book glossary of abstract nouns to make sense, the language of the developer has diverged from the language of the type system. 
+   * *The Escape Hatch:* Lift the concepts into the code. Wrap the primitive data inside explicit domain types, interfaces, enums, or tagged unions.
 
-4. **The Volume Ceiling (The ADR Threshold):** Inline comments must be scannable at normal scrolling speeds. If explaining the "Why" requires more than three sentences of dense systemic causality, the component is too coupled to be documented in-situ.
-   * *The Escape Hatch:* Abstract the logic behind a well-named coordinator function, and move the essay to an Architecture Decision Record (ADR) or a linked `.md` file.
+4. **The Cognitive Overflow (High Coupling):** If an inline comment requires an extensive essay of multi-component causality just to explain a single block of code, the component is violating the Single Responsibility Principle at the macro level.
+   * *The Escape Hatch:* Extract the subsystem behind an intentionally named Façade or Coordinator function, and move the architectural lore to an Architecture Decision Record (ADR) or linked system documentation.
 
 Only when a comment passes all four checks—and the code genuinely cannot be refactored to speak for itself—should the prose survive.
 
