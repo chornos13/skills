@@ -29,4 +29,4 @@ Install the `wt` shell command — see [shell-helpers.md](shell-helpers.md) for 
    ```
    The dependency folder is a shared, mutable symlink across every worktree — accepted, since testing is always sequential, never parallel. Done when the ticket's golden path and named edge cases are verified working end-to-end.
 
-5. **Close out.** Update the ticket's status in the main tree. Done when the ticket file reflects the outcome. (The worktree can stay; remove it whenever you like with `wt remove <slug>`.)
+5. **Close out.** Update the ticket's status in the main tree. Done when the ticket file reflects the outcome.
