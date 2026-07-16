@@ -12,17 +12,17 @@ A single `wt` command whose subcommands mirror `git worktree`'s own verbs (`add`
 #   wt <slug>              jump to the worktree matching <slug> (bare `wt` = fzf picker)
 wt() {
   case "$1" in
-    add)             shift; _wt_add "$@" ;;
-    remove|rm)       shift; _wt_remove "$@" ;;
+    add)             shift; __wt_add "$@" ;;
+    remove|rm)       shift; __wt_remove "$@" ;;
     list|ls)         git worktree list ;;
     prune)           git worktree prune ;;
     help|-h|--help)  echo "wt [add <type> <slug> | remove <slug> | list | prune | <slug>]" ;;
-    *)               _wt_jump "$@" ;;     # bare wt / wt <slug> = jump
+    *)               __wt_jump "$@" ;;    # bare wt / wt <slug> = jump
   esac
 }
 
 # jump to a worktree of the current repo: bare = fzf picker, <slug> = first match.
-_wt_jump() {
+__wt_jump() {
   local dir
   if [ -n "$1" ]; then
     dir=$(git worktree list 2>/dev/null | awk '{print $1}' | grep -i "$1" | head -1)
@@ -37,22 +37,22 @@ _wt_jump() {
   cd "$dir"
 }
 
+# symlink the main tree's dependency dir into a new worktree so it doesn't
+# reinstall.
+#
 # ── which folder to link for each project type ─────────────────────
 # One line per type:  "<file that identifies the project>  <folder to link>"
 # Want a new language? Add one line. That's the whole change.
-WTNEW_DEPS=(
-  "package.json      node_modules"
-  "pyproject.toml    .venv"
-  "requirements.txt  .venv"
-  "go.mod            vendor"
-  "Cargo.toml        target"
-)
-
-# symlink the main tree's dependency dir into a new worktree so it doesn't
-# reinstall. Reads the WTNEW_DEPS table above — no need to touch this.
-_wt_link_deps() {  # $1=main_root  $2=target
+__wt_link_deps() {  # $1=main_root  $2=target
+  local -a deps=(
+    "package.json      node_modules"
+    "pyproject.toml    .venv"
+    "requirements.txt  .venv"
+    "go.mod            vendor"
+    "Cargo.toml        target"
+  )
   local main_root="$1" target="$2" line marker depdir
-  for line in "${WTNEW_DEPS[@]}"; do
+  for line in "${deps[@]}"; do
     marker="${line%% *}"        # the file before the spaces
     depdir="${line##* }"        # the folder after the spaces
     if [ -f "$main_root/$marker" ] && [ -d "$main_root/$depdir" ]; then
@@ -65,7 +65,7 @@ _wt_link_deps() {  # $1=main_root  $2=target
 
 # create a new worktree, consistently: branch off the current active branch, symlink deps
 # and copy .env* from the main tree, cd into it. Usage: wt add <type> <slug>  e.g. wt add feat schedule-list-fix
-_wt_add() {
+__wt_add() {
   if [ $# -lt 2 ]; then
     echo "usage: wt add <type> <slug>   (type: feat|fix|bug|chore|va)" >&2
     return 1
@@ -90,7 +90,7 @@ _wt_add() {
   fi
 
   git -C "$main_root" worktree add "$target" -b "${type}/${slug}" "$base" || return 1
-  _wt_link_deps "$main_root" "$target"
+  __wt_link_deps "$main_root" "$target"
   # .env* are gitignored, so the checkout won't carry them over
   for f in "$main_root"/.env*(N); do
     cp "$f" "$target/"
@@ -101,7 +101,7 @@ _wt_add() {
 
 # remove a worktree by slug. Never touches the main worktree; steps you back to
 # it first if you're standing inside the one being removed. Usage: wt remove <slug>
-_wt_remove() {
+__wt_remove() {
   if [ -z "$1" ]; then
     echo "usage: wt remove <slug>" >&2
     return 1
@@ -121,6 +121,7 @@ _wt_remove() {
 
 ## Notes
 
-- **Multi-language.** Which dependency folder gets symlinked is driven by the `WTNEW_DEPS` table — Node (`node_modules`), Python (`.venv`), Go (`vendor`), Rust (`target`) out of the box. To support another language, add one `"<marker-file>  <folder>"` line; nothing else changes. If a project matches nothing, no symlink is made (no broken links).
+- **Multi-language.** Which dependency folder gets symlinked is driven by the `deps` table inside `__wt_link_deps` — Node (`node_modules`), Python (`.venv`), Go (`vendor`), Rust (`target`) out of the box. To support another language, add one `"<marker-file>  <folder>"` line; nothing else changes. If a project matches nothing, no symlink is made (no broken links).
 - **`.env*` is copied, not symlinked** — each worktree gets its own copy so tweaking env vars in one doesn't leak into the others.
+- **Keep the `__` prefix and the inlined `deps` table.** Some agent shells replay a captured snapshot of `~/.zshrc` instead of sourcing it, and the snapshot drops single-underscore functions (taken for completions) and arrays. A `_wt_add` helper or a global table is missing there, so `wt add` fails while `wt list` keeps working. Double underscores and a `local -a` table inside the function survive.
 - `wt` requires `fzf` only for the no-argument interactive picker (`which fzf` to check; install if missing). Everything else needs nothing beyond git.
