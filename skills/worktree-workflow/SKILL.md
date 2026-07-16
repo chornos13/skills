@@ -17,7 +17,7 @@ Install the `wt` shell command — see [shell-helpers.md](shell-helpers.md) for 
    ```
    wt add <type> <slug>       # type: feat|fix|bug|chore|va
    ```
-   Branches off the repo's default branch (`origin/HEAD`, e.g. `main` or `master`), symlinks the project's dependency folder (Node `node_modules`, Python `.venv`, Go `vendor`, Rust `target` — driven by the `WTNEW_DEPS` table), copies any gitignored `.env*` files from the main tree, lands you inside it. Done when `wt list` shows the new entry, the dependency folder resolves through its symlink, and the `.env*` files are present.
+   Branches off the currently checked-out branch (falls back to the repo default `origin/HEAD` only when HEAD is detached), symlinks the project's dependency folder (Node `node_modules`, Python `.venv`, Go `vendor`, Rust `target` — driven by the `WTNEW_DEPS` table), copies any gitignored `.env*` files from the main tree, lands you inside it. Done when `wt list` shows the new entry, the dependency folder resolves through its symlink, and the `.env*` files are present.
 
 3. **Implement**, briefed with both paths every time: the ticket's path in the main tree, the worktree's path for the code. Record progress on the ticket in the main tree (e.g. its `## Comments` section). Done when the ticket's stated requirement is met and its comments reflect current state.
 
