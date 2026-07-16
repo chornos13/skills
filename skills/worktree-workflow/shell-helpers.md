@@ -5,7 +5,7 @@ A single `wt` command whose subcommands mirror `git worktree`'s own verbs (`add`
 ```zsh
 # ── wt: shorthand over `git worktree`, plus a jump shortcut ────────
 # Subcommands mirror git's own verbs so there's nothing new to learn:
-#   wt add <type> <slug>   create a worktree (branch off the repo default, link deps, copy .env*)
+#   wt add <type> <slug>   create a worktree (branch off the current branch, link deps, copy .env*)
 #   wt remove <slug>       (alias: rm)   remove a worktree
 #   wt list                (alias: ls)   list worktrees
 #   wt prune               prune stale worktree metadata
@@ -63,7 +63,7 @@ _wt_link_deps() {  # $1=main_root  $2=target
   # no match / no dep folder → link nothing (no broken symlink)
 }
 
-# create a new worktree, consistently: branch off the repo default, symlink deps
+# create a new worktree, consistently: branch off the current active branch, symlink deps
 # and copy .env* from the main tree, cd into it. Usage: wt add <type> <slug>  e.g. wt add feat schedule-list-fix
 _wt_add() {
   if [ $# -lt 2 ]; then
@@ -79,11 +79,15 @@ _wt_add() {
   fi
   target="$(dirname "$main_root")/$(basename "$main_root")-${slug}"
 
-  # base branch = the repo's default (origin/HEAD), else whatever main has checked out
+  # base branch = whatever branch is currently checked out (the active branch),
+  # so worktrees stack off wherever you are — not hard-wired to main/master.
+  # Fall back to the repo default (origin/HEAD) only when HEAD is detached.
   local base
-  base=$(git -C "$main_root" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null)
-  base=${base#origin/}
-  [ -z "$base" ] && base=$(git -C "$main_root" symbolic-ref --short HEAD 2>/dev/null)
+  base=$(git symbolic-ref --short HEAD 2>/dev/null)
+  if [ -z "$base" ]; then
+    base=$(git -C "$main_root" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null)
+    base=${base#origin/}
+  fi
 
   git -C "$main_root" worktree add "$target" -b "${type}/${slug}" "$base" || return 1
   _wt_link_deps "$main_root" "$target"
