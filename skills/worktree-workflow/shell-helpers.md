@@ -92,7 +92,8 @@ __wt_add() {
   git -C "$main_root" worktree add "$target" -b "${type}/${slug}" "$base" || return 1
   __wt_link_deps "$main_root" "$target"
   # .env* are gitignored, so the checkout won't carry them over
-  for f in "$main_root"/.env*(N); do
+  setopt local_options null_glob
+  for f in "$main_root"/.env*; do
     cp "$f" "$target/"
   done
   cd "$target"
