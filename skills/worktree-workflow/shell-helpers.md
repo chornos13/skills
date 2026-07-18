@@ -6,7 +6,7 @@ A single `wt` command whose subcommands mirror `git worktree`'s own verbs (`add`
 # ── wt: shorthand over `git worktree`, plus a jump shortcut ────────
 # Subcommands mirror git's own verbs so there's nothing new to learn:
 #   wt add <type> <slug>   create a worktree (branch off the current branch, link deps, copy .env*)
-#   wt remove <slug>       (alias: rm)   remove a worktree
+#   wt remove [slug]       (alias: rm)   remove a worktree (fzf-pick if no/ambiguous slug; confirms first)
 #   wt list                (alias: ls)   list worktrees
 #   wt prune               prune stale worktree metadata
 #   wt <slug>              jump to the worktree matching <slug> (bare `wt` = fzf picker)
@@ -16,7 +16,7 @@ wt() {
     remove|rm)       shift; __wt_remove "$@" ;;
     list|ls)         git worktree list ;;
     prune)           git worktree prune ;;
-    help|-h|--help)  echo "wt [add <type> <slug> | remove <slug> | list | prune | <slug>]" ;;
+    help|-h|--help)  echo "wt [add <type> <slug> | remove [slug] | list | prune | <slug>]" ;;
     *)               __wt_jump "$@" ;;    # bare wt / wt <slug> = jump
   esac
 }
@@ -100,21 +100,57 @@ __wt_add() {
   echo "worktree ready: $target (branch ${type}/${slug}), deps symlinked, .env* copied"
 }
 
-# remove a worktree by slug. Never touches the main worktree; steps you back to
-# it first if you're standing inside the one being removed. Usage: wt remove <slug>
+# remove a worktree. Never touches the main worktree; steps you back to it first
+# if you're standing inside the one being removed. Always confirms before removing.
+# Usage: wt remove [slug]
+#   wt remove            fzf-pick from the removable worktrees
+#   wt remove <slug>     pick the first match; if several match, fzf-pick among them
 __wt_remove() {
-  if [ -z "$1" ]; then
-    echo "usage: wt remove <slug>" >&2
-    return 1
-  fi
   local main_root dir
   main_root=$(git worktree list 2>/dev/null | head -1 | awk '{print $1}')
-  # candidates exclude the first line (the main worktree) so it can't be removed
-  dir=$(git worktree list 2>/dev/null | tail -n +2 | awk '{print $1}' | grep -i "$1" | head -1)
-  if [ -z "$dir" ]; then
-    echo "wt remove: no removable worktree matching '$1'" >&2
+  if [ -z "$main_root" ]; then
+    echo "wt remove: not inside a git repo" >&2
     return 1
   fi
+
+  # candidates exclude the first line (the main worktree) so it can't be removed
+  local candidates
+  candidates=$(git worktree list 2>/dev/null | tail -n +2)
+  if [ -z "$candidates" ]; then
+    echo "wt remove: no removable worktrees (only the main tree exists)" >&2
+    return 1
+  fi
+
+  if [ -n "$1" ]; then
+    candidates=$(echo "$candidates" | grep -i "$1")
+    if [ -z "$candidates" ]; then
+      echo "wt remove: no removable worktree matching '$1'" >&2
+      return 1
+    fi
+  fi
+
+  # one candidate → take it; several (or no slug) → fzf picker
+  if [ "$(echo "$candidates" | wc -l)" -eq 1 ]; then
+    dir=$(echo "$candidates" | awk '{print $1}')
+  else
+    if ! command -v fzf >/dev/null 2>&1; then
+      echo "wt remove: multiple matches; install fzf to pick, or pass a more specific slug" >&2
+      echo "$candidates" >&2
+      return 1
+    fi
+    dir=$(echo "$candidates" | fzf --prompt="remove worktree> " | awk '{print $1}')
+    [ -z "$dir" ] && return 1   # picker cancelled
+  fi
+
+  # confirm before removing
+  printf "remove worktree '%s'? [y/N] " "$dir"
+  local reply
+  read -r reply
+  case "$reply" in
+    y|Y|yes|YES) ;;
+    *) echo "wt remove: cancelled"; return 1 ;;
+  esac
+
   case "$PWD/" in "$dir/"*) cd "$main_root" ;; esac
   git worktree remove "$dir" && echo "removed worktree: $dir"
 }
@@ -125,4 +161,5 @@ __wt_remove() {
 - **Multi-language.** Which dependency folder gets symlinked is driven by the `deps` table inside `__wt_link_deps` — Node (`node_modules`), Python (`.venv`), Go (`vendor`), Rust (`target`) out of the box. To support another language, add one `"<marker-file>  <folder>"` line; nothing else changes. If a project matches nothing, no symlink is made (no broken links).
 - **`.env*` is copied, not symlinked** — each worktree gets its own copy so tweaking env vars in one doesn't leak into the others.
 - **Keep the `__` prefix and the inlined `deps` table.** Some agent shells replay a captured snapshot of `~/.zshrc` instead of sourcing it, and the snapshot drops single-underscore functions (taken for completions) and arrays. A `_wt_add` helper or a global table is missing there, so `wt add` fails while `wt list` keeps working. Double underscores and a `local -a` table inside the function survive.
-- `wt` requires `fzf` only for the no-argument interactive picker (`which fzf` to check; install if missing). Everything else needs nothing beyond git.
+- `wt` requires `fzf` for the interactive pickers — bare `wt` (jump) and `wt remove` with no/ambiguous slug (`which fzf` to check; install if missing). A `wt remove <slug>` that matches exactly one worktree needs nothing beyond git.
+- **`wt remove` always confirms.** After a worktree is chosen (by slug or picker) it prompts `remove worktree '<path>'? [y/N]` and only proceeds on `y`/`yes`; anything else cancels. The main worktree is never a candidate.
