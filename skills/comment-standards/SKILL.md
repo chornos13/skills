@@ -26,4 +26,4 @@ A comment that exists only to explain [X] is usually a missing [structure]. Pref
 - **Missing test** — the comment narrates a repro or edge case (*"otherwise doing X causes Y"*). Fix: move it into a test; use the prose as the test name.                                - **Missing domain type** — the comment defines off-book nouns so the code read a named type, enum, or tagged union.
 - **God object** — the comment needs a paragraph of cross-component causality for one block. Fix: extract the subsystem behind a named function; move the architecture note to an ADR and link it.
 
-<imporant>Better comment is no comment</important>
+<important>Better comment is no comment</important>
