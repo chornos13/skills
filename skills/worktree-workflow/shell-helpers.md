@@ -37,33 +37,65 @@ __wt_jump() {
   cd "$dir"
 }
 
-# symlink the main tree's dependency dir into a new worktree so it doesn't
-# reinstall.
+# give a new worktree the main tree's dependency dir so it doesn't reinstall.
 #
-# ── which folder to link for each project type ─────────────────────
-# One line per type:  "<file that identifies the project>  <folder to link>"
+# ── which folder to share for each project type, and how ───────────
+# One line per type:  "<file that identifies the project>  <folder>  <link|copy>"
 # Want a new language? Add one line. That's the whole change.
+#
+#   link = symlink the main tree's folder. Instant, but the two trees share one
+#          directory, so writes in the worktree land in the main tree.
+#   copy = cp -al, a hardlink farm: real directories, file contents shared.
+#          node_modules needs this for two reasons. Turbopack rejects any
+#          symlink resolving outside the project root, and worktrees live in a
+#          *sibling* directory, so a symlinked node_modules is always out of
+#          root — Next 16 dies at startup with "Symlink node_modules is
+#          invalid, it points out of the filesystem root". It also stops
+#          `yarn add` in a worktree from silently rewriting the main tree's
+#          node_modules. Costs directories only (~22MB for a 5.5k-dir tree);
+#          file contents are shared, not duplicated.
+#
+# .venv/target stay on link deliberately: a venv hardcodes absolute paths in
+# pyvenv.cfg and bin/activate, so a copy would look independent while still
+# pointing at the original, and cargo rewrites target/ in place.
 __wt_link_deps() {  # $1=main_root  $2=target
   local -a deps=(
-    "package.json      node_modules"
-    "pyproject.toml    .venv"
-    "requirements.txt  .venv"
-    "go.mod            vendor"
-    "Cargo.toml        target"
+    "package.json      node_modules  copy"
+    "pyproject.toml    .venv         link"
+    "requirements.txt  .venv         link"
+    "go.mod            vendor        link"
+    "Cargo.toml        target        link"
   )
-  local main_root="$1" target="$2" line marker depdir
+  local main_root="$1" target="$2" line
+  local -a f
+  [ -n "$main_root" ] && [ -n "$target" ] || return 1   # guard the rm -rf below
   for line in "${deps[@]}"; do
-    marker="${line%% *}"        # the file before the spaces
-    depdir="${line##* }"        # the folder after the spaces
-    if [ -f "$main_root/$marker" ] && [ -d "$main_root/$depdir" ]; then
-      ln -s "$main_root/$depdir" "$target/$depdir"
-      return                    # linked one, done
+    f=(${=line})                # split on whitespace: marker, depdir, mode
+    if [ -f "$main_root/$f[1]" ] && [ -d "$main_root/$f[2]" ]; then
+      # Already present in the checkout (committed by mistake, or left behind)?
+      # Leave it alone: `cp -al` would nest it as node_modules/node_modules.
+      if [ -e "$target/$f[2]" ]; then
+        echo "wt: $f[2] already exists in the worktree — left as is." >&2
+        return
+      fi
+      if [ "$f[3]" = copy ] && cp -al "$main_root/$f[2]" "$target/$f[2]" 2>/dev/null; then
+        return                  # hardlinked, done
+      fi
+      if [ "$f[3]" = copy ]; then
+        # cp -al only works within one filesystem. Fall back rather than leave
+        # the worktree with no deps, but say so — Turbopack will reject this.
+        rm -rf "$target/$f[2]"  # clear any half-finished copy
+        echo "wt: hardlinking $f[2] failed (different filesystem?) — symlinked instead." >&2
+        echo "    Turbopack will refuse this; run a real install in the worktree." >&2
+      fi
+      ln -s "$main_root/$f[2]" "$target/$f[2]"
+      return                    # handled one, done
     fi
   done
   # no match / no dep folder → link nothing (no broken symlink)
 }
 
-# create a new worktree, consistently: branch off the current active branch, symlink deps
+# create a new worktree, consistently: branch off the current active branch, link deps
 # and copy .env* from the main tree, cd into it. Usage: wt add <type> <slug>  e.g. wt add feat schedule-list-fix
 __wt_add() {
   if [ $# -lt 2 ]; then
@@ -97,7 +129,7 @@ __wt_add() {
     cp "$f" "$target/"
   done
   cd "$target"
-  echo "worktree ready: $target (branch ${type}/${slug}), deps symlinked, .env* copied"
+  echo "worktree ready: $target (branch ${type}/${slug}), deps linked, .env* copied"
 }
 
 # remove a worktree. Never touches the main worktree; steps you back to it first
@@ -158,7 +190,15 @@ __wt_remove() {
 
 ## Notes
 
-- **Multi-language.** Which dependency folder gets symlinked is driven by the `deps` table inside `__wt_link_deps` — Node (`node_modules`), Python (`.venv`), Go (`vendor`), Rust (`target`) out of the box. To support another language, add one `"<marker-file>  <folder>"` line; nothing else changes. If a project matches nothing, no symlink is made (no broken links).
+- **Multi-language.** Which dependency folder gets shared is driven by the `deps` table inside `__wt_link_deps` — Node (`node_modules`), Python (`.venv`), Go (`vendor`), Rust (`target`) out of the box. To support another language, add one `"<marker-file>  <folder>  <link|copy>"` line; nothing else changes. If a project matches nothing, nothing is created (no broken links).
+- **`node_modules` is hardlinked (`copy`), not symlinked.** Two reasons, and the first one is fatal rather than cosmetic:
+  - **Turbopack refuses out-of-root symlinks.** Worktrees are created as a *sibling* of the main tree, so a symlinked `node_modules` always resolves outside the project root. Next 16 (where Turbopack is the default for both `dev` and `build`) aborts at startup with `TurbopackInternalError: Symlink node_modules is invalid, it points out of the filesystem root`. Webpack projects are unaffected, which is why this stayed hidden until a Next 16 upgrade.
+  - **A symlink makes the two trees share one directory.** `yarn add` in a worktree writes into the *main* tree's `node_modules` while updating only the worktree's `package.json`/lockfile — main ends up with packages its manifest doesn't declare. Hardlinking gives each worktree real directories, so adds and removes stay local.
+
+  Cost is directories only — measured on a 1.1 GB / 59,794-file `node_modules`: **+22 MB and 0.7s**, of which ~22 MB is the 5,512 directories (directories can't be hardlinked) and ~0.6 MB is filenames. File contents are shared, contributing zero. Compare a real `yarn install` per worktree at 1.1 GB.
+
+  The one hazard is tools that patch files **in place** inside `node_modules` (e.g. `patch-package`), since shared inodes mean the edit hits both trees. npm/yarn installs are safe — they unlink and replace, which breaks the link first. If a project uses `patch-package`, run a real install in that worktree.
+- **`cp -al` requires one filesystem.** Worktrees are siblings of the main tree, so this holds in practice; if it ever fails, `wt` falls back to a symlink and warns that Turbopack will reject it.
 - **`.env*` is copied, not symlinked** — each worktree gets its own copy so tweaking env vars in one doesn't leak into the others.
 - **Keep the `__` prefix and the inlined `deps` table.** Some agent shells replay a captured snapshot of `~/.zshrc` instead of sourcing it, and the snapshot drops single-underscore functions (taken for completions) and arrays. A `_wt_add` helper or a global table is missing there, so `wt add` fails while `wt list` keeps working. Double underscores and a `local -a` table inside the function survive.
 - `wt` requires `fzf` for the interactive pickers — bare `wt` (jump) and `wt remove` with no/ambiguous slug (`which fzf` to check; install if missing). A `wt remove <slug>` that matches exactly one worktree needs nothing beyond git.
