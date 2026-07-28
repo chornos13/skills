@@ -12,6 +12,8 @@ One long sentence. Five undefined terms. No order you can follow. No picture.
 
 ## ✅ After — the shape
 
+*(Written after reading `api/reports.py:40-96` and the job handler it calls — not from the endpoint's name.)*
+
 **Bottom line:** You ask the server to build a report. It replies "got it, not done yet"
 and hands you a link. You check that link until the report is ready.
 
@@ -44,3 +46,7 @@ and hands you a link. You check that link until the report is ready.
 - **idempotent** — sending the same request twice does the same as sending it once (safe to retry).
 - **202** — an HTTP reply meaning "accepted, but not finished yet".
 - **poll** — check a link repeatedly until the answer changes.
+
+Note what rung 0 bought: the polling interval and the `failed` state came from reading
+the handler, not from guessing at the endpoint. Anything unread would have been
+labelled — "I could not find the timeout; this is my inference."
