@@ -1,6 +1,6 @@
 ---
 name: explain
-description: Explain in a fixed, legible shape — check the real thing first, bottom line first, walk it start to end, show a concrete artifact (JSON, table, diagram), split the maker and the user lens, and gloss every jargon term. Use when explaining how something works, walking through code, a document, a process, or a system, answering "how does X work", or when the user says they are lost, confused, or asks to "explain" / "ELI5" / "walk me through" it.
+description: Explain in a fixed, legible shape — check the real thing first, bottom line first, walk it start to end, show a concrete artifact (JSON, table, diagram), split it into as many role lenses as it has, and gloss every jargon term. Use when explaining how something works, walking through code, a document, a process, or a system, answering "how does X work", or when the user says they are lost, confused, or asks to "explain" / "ELI5" / "walk me through" it.
 ---
 
 Every explanation takes the same shape, in this order. Skip a rung only when it genuinely does not apply — never pad it to fill space.
@@ -30,16 +30,13 @@ Anchor every abstract word to something concrete: a JSON shape, a request/respon
 
 Prefer real artifacts you actually saw over invented ones. If you must fabricate an example to make a point, say it is illustrative.
 
-## 4. Split the two lenses
+## 4. Split the lenses
 
-When a thing matters differently to the people inside it and the people on the receiving end, separate it under headings:
+A **lens** is one role's view of the thing. The same mechanism looks different depending on who is looking, so give each view its own heading, named for the real role — **Developer**, **Operator**, **Reviewer**, **Customer**, **Reader**, **On-call**.
 
-- **Inside lens** — the mechanism: the contract, the shape of the data, the edge cases, what breaks, what to touch. For code this is the developer's view; for a process it is whoever runs it.
-- **Outside lens** — what the affected person sees, what changes for them, what they have to do.
+Let the thing decide how many. Pure internals has one lens. A payment flow has three or four. A lens earns its heading when its role needs something no other heading carries. Drop it when it repeats a neighbour.
 
-Name the headings for the actual roles when you know them — **Developer / User**, **Operator / Customer**, **Author / Reader**.
-
-Only split when both lenses carry real weight. A pure-internals topic has no outside lens; do not invent one.
+Each lens answers what its role actually asks. Whoever builds or runs the thing wants the mechanism: the contract, the shape of the data, the edge cases, what breaks, what to touch. Whoever receives it wants the consequence: what they see, what changed, what they do next.
 
 ## 5. Gloss every jargon term
 
