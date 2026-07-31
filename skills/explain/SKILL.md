@@ -34,7 +34,7 @@ Prefer real artifacts you actually saw over invented ones. If you must fabricate
 
 A **lens** is one role's view of the thing. The same mechanism looks different depending on who is looking, so give each view its own heading, named for the real role — **Developer**, **Operator**, **Reviewer**, **Customer**, **Reader**, **On-call**.
 
-Let the thing decide how many. Pure internals has one lens. A payment flow has three or four. A lens earns its heading when someone in that role needs something no other heading carries; drop it when the answer repeats what a neighbour already said.
+Let the thing decide how many. Pure internals has one lens. A payment flow has three or four. A lens earns its heading when its role needs something no other heading carries. Drop it when it repeats a neighbour.
 
 Each lens answers what its role actually asks. Whoever builds or runs the thing wants the mechanism: the contract, the shape of the data, the edge cases, what breaks, what to touch. Whoever receives it wants the consequence: what they see, what changed, what they do next.
 
