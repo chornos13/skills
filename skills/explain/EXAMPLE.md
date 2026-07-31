@@ -36,8 +36,8 @@ and hands you a link. You check that link until the report is ready.
 **Split the two lenses:**
 
 - **Developer lens** — the create call is *idempotent*, so retrying it is safe.
-  Poll `check_here` until `status` is `done` or `failed`; don't assume the report
-  exists on the first call.
+  Poll `check_here` until `status` is `done` or `failed`. Treat the first reply as
+  unfinished.
 - **User lens** — you click "Generate report", see a spinner, and the report appears
   a few seconds later. Nothing to do but wait.
 
