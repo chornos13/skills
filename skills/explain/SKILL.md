@@ -47,6 +47,18 @@ The first time a technical term or acronym appears, define it in plain words in 
 
 ## Voice
 
-Short sentences. Plain words over clever ones. One idea per sentence. Write for a reader who is tired, not for one who is stupid.
+Write for a reader who is tired, not for one who is stupid.
+
+Write in **Simplified Technical English** — ASD-STE100, the controlled English aerospace uses for maintenance manuals, built so an exhausted reader cannot misread a line. The rules that carry the weight here:
+
+- **One word, one meaning; one meaning, one word.** Name a thing once and keep that name. A `record` stays a `record` — never a `row`, then an `entry`, then an `item`. A synonym reads as a second concept.
+- **Twenty words a sentence, six sentences a paragraph.** Split what runs longer at the nearest `and`, `but`, or comma.
+- **Name the actor.** "The server writes the file", not "the file is written". Who does the thing is usually the point.
+- **Present tense, simple verbs.** "The hook rewrites the command" — not "will rewrite", not "on rewriting the command".
+- **Condition before action.** "If the token expired, refresh it." The reader learns whether a sentence applies to them before spending it.
+- **Three nouns in a row, at most.** "user session cache key" becomes "the key for the user's session cache".
+- **State facts literally.** "The request fails", not "the request dies". Keep the figure of speech out of any sentence that carries a fact.
+
+Domain vocabulary stays — STE approves the subject's own terms, and rung 5 glosses them. Copy code, log lines, and quoted output verbatim; a real artifact is evidence, not prose to simplify.
 
 A full worked example — the same explanation written badly, then in this shape — is in [`EXAMPLE.md`](EXAMPLE.md).
