@@ -33,7 +33,7 @@ and hands you a link. You check that link until the report is ready.
 }
 ```
 
-**Split the two lenses:**
+**Split the lenses:**
 
 - **Developer lens** — the create call is *idempotent*, so retrying it is safe.
   Poll `check_here` until `status` is `done` or `failed`. Treat the first reply as
