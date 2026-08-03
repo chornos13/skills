@@ -1,7 +1,6 @@
 ---
 name: take-ticket
-description: Take one ticket from a stack — wait for the tickets ahead of it, then build it.
-disable-model-invocation: true
+description: Run only when the user types `/take-ticket <path-to-ticket.md>` — never pick this up on your own, and never as a way to work on a ticket someone mentioned. It takes one numbered ticket from a stack, parks the session until every ticket ahead of it is resolved, then builds it.
 ---
 
 # Take Ticket
