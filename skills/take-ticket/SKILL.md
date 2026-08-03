@@ -11,14 +11,16 @@ One session, one ticket. Launch every session at once; each waits its **turn**, 
 
 ## 1. Wait your turn
 
-**Predecessors** are every ticket in the same directory with a lower number, minus any reading `Status: resolved` or `wontfix`. Marking a ticket `wontfix` lifts it out of the order.
+The **stack** is the directory the argument points into — `dirname` of the path you were handed, wherever the project keeps its tickets. Never look anywhere else for it.
+
+**Predecessors** are every ticket in that directory with a lower number, minus any reading `Status: resolved` or `wontfix`. Marking a ticket `wontfix` lifts it out of the order. If the file names carry no leading number, the directory declares no turn order — go straight to step 2.
 
 Read nothing but their `Status:` lines — a predecessor is still changing the ticket, the code and the standards.
 
 Park until every predecessor reads `Status: resolved`. Poll through `Bash` in the background as an `until` loop, with the largest timeout the tool accepts; it wakes you once, when the condition goes true, and the session stays idle meanwhile:
 
 ```bash
-cd .scratch/<feature>/issues
+cd "$(dirname <path-to-ticket.md>)"
 # the predecessor files from above — here, ticket 04's
 until [ -z "$(grep -L '^\**Status:\** *resolved' 01-*.md 02-*.md 03-*.md)" ]; do sleep 30; done
 ```
