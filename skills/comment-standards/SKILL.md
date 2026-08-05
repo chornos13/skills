@@ -1,29 +1,58 @@
 ---
 name: comment-standards
-description: Use when writing or reviewing code comments — decides which comments earn their place and which signal a refactor. Triggers on code review, adding inline comments, "should this be a comment".
+description: Use when writing or reviewing code comments — decides which comments earn their place. Triggers on code review, adding inline comments, "should this be a comment".
 ---
 
-Every comment is a **smell** until it earns its place. Default to changing the code, not annotating it.
+Two genres. Do not mix the rules.
 
-Code already states *what* it does. A comment earns its place only by carrying what code cannot: **why** this approach over the alternative, a non-obvious constraint, context the next reader lacks.
+## Interface docs (exported functions, types, public API)
 
-## Triage each comment
+The audience is a caller who will never read the body. Document what a signature can't say: units, ownership, error and nil behaviour, whether it blocks, whether it mutates. Keep these.
 
-For every comment in the diff — existing or one you're about to write — walk this order and stop at the first that fires:
+Match the surrounding density — if the file documents its exports, write one; if it doesn't, don't start.
 
-1. **A name carries it** → the comment says what a variable or function *is*. Rename; drop the comment.
-2. **Simpler code carries it** → simplify until the comment is redundant; drop it.
-3. **It restates the code** → delete it.
-4. **It matches a structural smell** (below) → apply the fix; the comment goes away with the structure.
-5. **It explains why** → keep it.
+Not a doc comment: restating the signature in prose. Delete those.
 
-Done when every comment in the diff has hit one of these.
+## Inline comments
 
-## Structural smells
+**The source test.** An inline comment stays only if it can name something outside this code — an incident, a ticket, a spec or vendor behaviour, a measurement, an approach that was tried and failed. If you can't name the source, you're narrating what the code already says. Delete it.
 
-A comment that exists only to explain [X] is usually a missing [structure]. Prefer the fix; keep the comment only when the fix is genuinely not warranted here.                           
-- **Missing state machine** — the comment maps overlapping booleans, ordering, or races (*"if X while Y but Z hasn't resolved"*). Fix: reify the states into an explicit status enum, looktable, or reducer.
-- **Missing test** — the comment narrates a repro or edge case (*"otherwise doing X causes Y"*). Fix: move it into a test; use the prose as the test name.                                - **Missing domain type** — the comment defines off-book nouns so the code read a named type, enum, or tagged union.
-- **God object** — the comment needs a paragraph of cross-component causality for one block. Fix: extract the subsystem behind a named function; move the architecture note to an ADR and link it.
+Earns its place:
 
-<important>Better comment is no comment</important>
+```
+// Stripe returns 200 with an error body here (STRIPE-4412)
+// Sorted before hashing — unsorted order broke cache keys in prod, Mar 3
+// Sequential on purpose: batching this hit the 100-row API limit
+```
+
+Narration — delete:
+
+```
+// use a map for O(1) lookup
+// increment the counter
+// validate input before processing
+```
+
+"Why" alone is not the bar. Every author believes their comment explains why, and `// we use a map here for O(1) lookup` is a why. The bar is a source the next reader could not have recovered by reading the repo.
+
+## Always fine, no source needed
+
+These are pointers, not explanations:
+
+- `// TODO(owner): what, + ticket` — with an owner, or delete it
+- `// keep in sync with <file>` — a coupling the compiler won't catch
+- `// eslint-disable-next-line <rule> — reason` — a suppression must justify itself
+- Links to an RFC, ADR, or upstream issue
+
+## Never
+
+- Commented-out code — git has it
+- Changelog comments (`// added 2024-03`, `// was: foo`)
+- Section banners
+- A comment that narrates the diff rather than the code
+
+## Style
+
+One line where possible. Name the specific thing — the vendor, the ticket, the failure, the date. A comment that needs a paragraph of cross-component causality belongs in an ADR; link it.
+
+Before writing a comment, check whether a rename would make it unnecessary. If it would, rename. But don't restructure working code just to delete a comment — deleting the comment is the cheaper fix, and a speculative refactor is a worse outcome than the comment was.
