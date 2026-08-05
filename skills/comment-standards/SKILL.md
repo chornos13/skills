@@ -35,6 +35,12 @@ Narration — delete:
 
 "Why" alone is not the bar. Every author believes their comment explains why, and `// we use a map here for O(1) lookup` is a why. The bar is a source the next reader could not have recovered by reading the repo.
 
+**The anchor test.** A comment is about the code beside it. Point at the exact line or branch it describes. If you can't — the approach changed, the branch is gone, the workaround was replaced — delete it. Passing the source test doesn't save it: a real ticket can describe behaviour the code no longer has.
+
+When you replace an approach, the comments explaining the old one are part of what you're replacing. Delete them in the same diff. A comment that survives a rewrite it wasn't written for is worse than no comment — the reader believes it and goes looking for code that isn't there.
+
+Don't soften a stale comment into something still technically true. Vague and true is not a repair; it's a comment with no source and no anchor. Delete it.
+
 ## Always fine, no source needed
 
 These are pointers, not explanations:
