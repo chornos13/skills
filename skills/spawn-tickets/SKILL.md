@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 The current window is **window 1**. Your pane stays put and holds one slot, so window 1 takes N−1 tickets; every later window is new and packed with N. New windows open in the background — focus never leaves your pane.
 
-Requires an interactive tmux session (`$TMUX_PANE` set).
+Requires an interactive tmux session (`$TMUX_PANE` set), and **bash** to run the recipe — it leans on bash arrays and globbing (`mapfile`, `shopt`), so under a zsh login shell run it as `bash -c` or from a `bash` script file.
 
 ## 1. Read the invocation
 
@@ -47,7 +47,7 @@ SESSION=$(tmux display-message -t "$CUR" -p '#{session_id}')
 
 launch() { # pane_id file — title it, then type its command into a live shell
   tmux select-pane -t "$1" -T "$(basename "$2")"
-  tmux send-keys  -t "$1" "claude \"/take-ticket $2\"" Enter
+  tmux send-keys  -t "$1" "claude --permission-mode auto \"/take-ticket $2\"" Enter
 }
 
 idx=0; total=${#files[@]}
@@ -59,7 +59,7 @@ for ((k=0; k<N-1 && idx<total; k++, idx++)); do
   p=$(tmux split-window -h -d -t "$anchor" -P -F '#{pane_id}')
   launch "$p" "${files[idx]}"; anchor="$p"
 done
-tmux select-layout -t "$WIN1" tiled
+tmux select-layout -t "$WIN1" even-horizontal
 
 # further windows, N tickets each, opened in the background (-d) on this session
 while (( idx < total )); do
@@ -72,18 +72,20 @@ while (( idx < total )); do
     p=$(tmux split-window -h -d -t "$anchor" -P -F '#{pane_id}')
     launch "$p" "${files[idx]}"; anchor="$p"
   done
-  tmux select-layout -t "$win" tiled
+  tmux select-layout -t "$win" even-horizontal
 done
 
 # focus never left your pane — make it explicit
 tmux select-window -t "$WIN1"; tmux select-pane -t "$CUR"
 ```
 
-Three tmux facts the recipe leans on, each load-bearing:
+Five facts the recipe leans on, each load-bearing:
 
 - **`new-window -t "$SESSION"`** — an untargeted `new-window` retargets whatever session is *attached*, leaking windows into the wrong session. Always name the session.
 - **`-d`** on `new-window` and `split-window` — creates without stealing focus, so window 1 and your pane stay active throughout.
 - **`pane-border-status top`** — pane titles only render once this is set on the window; without it `select-pane -T` is silent.
+- **`even-horizontal`** — packs the panes into side-by-side columns, matching the left-to-right order they were split in. `tiled` picks rows or columns by the window's aspect ratio, so a short wide window can stack them; `even-horizontal` is the deterministic column layout.
+- **`--permission-mode auto`** — you fan out more sessions than you can babysit, so each `claude` runs in auto mode and never parks on a permission prompt.
 
 Done when every file has exactly one titled pane running its command, and the only untitled pane is yours.
 
