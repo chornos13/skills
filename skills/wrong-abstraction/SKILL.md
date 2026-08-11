@@ -21,12 +21,13 @@ Completion criterion: every copy classified true or coincidental, and you extrac
 
 ## What the extraction costs the reader
 
-Sameness governs whether sharing is *safe*; legibility governs whether it *pays*. Each of these has a yes-or-no answer, so read them as defects to find rather than costs to weigh:
+Sameness governs whether sharing is *safe*; legibility governs whether it *pays*. One rule, with a yes-or-no answer: **whatever distinguishes this call site from the next reads there, under its own name.** Its instances:
 
-- **A flag argument is a defect.** The same word appears at every call site; the difference lives in the signature. Pass a named field, or inline the call. Surrounding prose that explains the flag — a comment, a test name — confirms the defect, since the call site needed prose to be read.
-- **A magic number in an argument list is a defect.** A bare literal sends the reader to the signature to learn which parameter it fills. A named field carries its meaning to the call site.
-- **The subject reads as literal text at the call site.** Whatever a caller exists to demonstrate — the field a test varies, the value that makes this case different — appears there in code.
-- **In tests, prefer DAMP over DRY.** Each test reads as a self-contained description, so a repeated literal costs less there than in production code.
+- A **flag argument** — the value is visible, the name is in the signature. Pass a named field, or inline the call.
+- A **magic number** in an argument list — the same, and the reader must also recall argument order.
+- A test whose *name* supplies what its body omits. Prose explaining an argument confirms the defect, since the call site needed prose to be read.
+
+In tests this rule is **DAMP** over DRY: each test reads as a self-contained description, so a repeated literal costs less there than in production code.
 
 ## When an abstraction is already wrong
 
@@ -38,7 +39,7 @@ Signal: a shared abstraction carries a parameter, flag, or conditional that exis
 
 ## Standing rules
 
-- Judge an existing helper as if you were about to write it. Incumbency is not evidence that sharing was right: run its callers through *Before you extract* as though the helper did not exist, and let "when unsure, duplicate" break the tie. "Not worth the churn" is how a wrong abstraction survives review.
+- Judge an existing helper as if you were about to write it. Incumbency is not evidence that sharing was right: run its callers through *Before you extract* as though the helper did not exist, and let "when unsure, duplicate" break the tie.
 - Test the behavior and business value, not the abstraction. Tests bound to features survive inlining; tests bound to a helper become locks that prevent undoing the mistake. The tell is a **tautological assertion** — the expected value built by the same helper that built the input, so a wrong shape passes; the expected value reads as a literal.
 - Treat deleting an abstraction as healthy work, ranked alongside adding one.
 - When justifying a sharing decision, name the trade — what is gained and what is paid — rather than citing "DRY" as the reason.
