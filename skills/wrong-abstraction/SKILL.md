@@ -1,6 +1,6 @@
 ---
 name: wrong-abstraction
-description: Weigh duplication against the wrong abstraction before sharing code. Use when about to extract a helper, base class, component, hook, or module from repeated code; when a shared abstraction is growing parameters, flags, or conditionals to serve callers that are diverging; or when deciding whether some duplication is worth removing at all.
+description: Weigh duplication against the wrong abstraction before sharing code. Use when about to extract a helper, base class, component, hook, or module from repeated code; when a shared abstraction carries parameters, flags, or conditionals serving callers that are diverging; when a helper's call sites read worse than the code they replaced; or when deciding whether some duplication is worth removing at all.
 ---
 
 # The wrong abstraction
@@ -21,11 +21,11 @@ Completion criterion: every copy classified true or coincidental, and you extrac
 
 ## What the extraction costs the reader
 
-Sameness governs whether sharing is *safe*; legibility governs whether it *pays*. One rule, with a yes-or-no answer: **whatever distinguishes this call site from the next reads there, under its own name.** Its instances:
+Sameness governs whether sharing is *safe*; legibility governs whether it *pays*. **DAMP** — descriptive and meaningful phrases — is the counterweight to DRY: a call site reads as a self-contained description, and a repeated literal costs less than one smuggled through a parameter. DAMP resolves to one rule with a yes-or-no answer: **whatever distinguishes this call site from the next reads there, under its own name.** Its instances:
 
 - A **flag argument** — the value is visible, the name is in the signature. Pass a named field, or inline the call.
 - A **magic number** in an argument list — the same, and the reader must also recall argument order.
-- Prose that supplies what the argument omits — a comment, a docstring, a test name — confirms the defect, since the call site needed prose to be read.
+- Prose that supplies what the argument omits — a comment, a docstring, the name of the block it sits in — confirms the defect, since the call site needed prose to be read.
 
 ## When an abstraction is already wrong
 
