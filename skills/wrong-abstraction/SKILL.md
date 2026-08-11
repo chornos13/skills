@@ -25,9 +25,7 @@ Sameness governs whether sharing is *safe*; legibility governs whether it *pays*
 
 - A **flag argument** — the value is visible, the name is in the signature. Pass a named field, or inline the call.
 - A **magic number** in an argument list — the same, and the reader must also recall argument order.
-- A test whose *name* supplies what its body omits. Prose explaining an argument confirms the defect, since the call site needed prose to be read.
-
-In tests this rule is **DAMP** over DRY: each test reads as a self-contained description, so a repeated literal costs less there than in production code.
+- Prose that supplies what the argument omits — a comment, a docstring, a test name — confirms the defect, since the call site needed prose to be read.
 
 ## When an abstraction is already wrong
 
