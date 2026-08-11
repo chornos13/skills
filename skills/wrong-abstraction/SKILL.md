@@ -21,10 +21,11 @@ Completion criterion: every copy classified true or coincidental, and you extrac
 
 ## What the extraction costs the reader
 
-Sameness governs whether sharing is *safe*; legibility governs whether it *pays*. An extraction earns its place when the call site still says what it is about without opening the helper.
+Sameness governs whether sharing is *safe*; legibility governs whether it *pays*. Each of these has a yes-or-no answer, so read them as defects to find rather than costs to weigh:
 
-- **Keep the subject at the call site.** Whatever a caller exists to demonstrate — the field a test varies, the status code that makes this case different — reads as literal text there.
-- **Name arguments at the boundary.** A **flag argument** or a bare positional number (`refuseStream(401, 403)`) sends the reader to the signature; a named field carries its meaning with it.
+- **A boolean literal in an argument list is a defect.** `save(true)` and `save(false)` are one word at both call sites; the difference lives in the signature. Pass a named field, or inline the call. Surrounding prose that explains the flag — a comment, a test name — confirms the defect, since the call site needed prose to be read.
+- **A bare positional literal is a defect.** `retry(3, 500)` sends the reader to the signature to learn which number is which. A named field carries its meaning to the call site.
+- **The subject reads as literal text at the call site.** Whatever a caller exists to demonstrate — the field a test varies, the status code that makes this case different — appears there in code.
 - **In tests, prefer DAMP over DRY.** Each test reads as a self-contained description, so a repeated literal costs less there than in production code.
 
 ## When an abstraction is already wrong
@@ -37,6 +38,7 @@ Signal: a shared abstraction carries a parameter, flag, or conditional that exis
 
 ## Standing rules
 
+- Judge an existing helper as if you were about to write it. Incumbency is not evidence that sharing was right: run its callers through *Before you extract* as though the helper did not exist, and let "when unsure, duplicate" break the tie. "Not worth the churn" is how a wrong abstraction survives review.
 - Test the behavior and business value, not the abstraction. Tests bound to features survive inlining; tests bound to a helper become locks that prevent undoing the mistake.
 - Treat deleting an abstraction as healthy work, ranked alongside adding one.
 - When justifying a sharing decision, name the trade — what is gained and what is paid — rather than citing "DRY" as the reason.
