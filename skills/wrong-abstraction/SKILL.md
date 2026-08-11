@@ -13,15 +13,23 @@ Duplication's cost is local and visible. The wrong abstraction's cost is hidden 
 
 Apply this gate before sharing code across call sites:
 
-1. **Count the copies.** Extract on the third real occurrence. Two is not yet a pattern.
+1. **Count the copies.** Three real occurrences is the floor, not the trigger. Two is not yet a pattern.
 2. **Test sameness, not similarity.** Decide whether the copies encode one piece of knowledge that must always change together (**true duplication**), or merely look alike today and will change for different reasons (**coincidental duplication**).
 3. **Extract only true duplication.** Leave coincidental duplication copied.
 
 Completion criterion: every copy classified true or coincidental, and you extract only when all copies are true duplication of one another.
 
+## What the extraction costs the reader
+
+Sameness governs whether sharing is *safe*; legibility governs whether it *pays*. An extraction earns its place when the call site still says what it is about without opening the helper.
+
+- **Keep the subject at the call site.** Whatever a caller exists to demonstrate — the field a test varies, the status code that makes this case different — reads as literal text there.
+- **Name arguments at the boundary.** A **flag argument** or a bare positional number (`refuseStream(401, 403)`) sends the reader to the signature; a named field carries its meaning with it.
+- **In tests, prefer DAMP over DRY.** Each test reads as a self-contained description, so a repeated literal costs less there than in production code.
+
 ## When an abstraction is already wrong
 
-Signal: a shared abstraction is growing a parameter, flag, or conditional to serve a caller that is diverging from the rest.
+Signal: a shared abstraction carries a parameter, flag, or conditional that exists to serve a caller diverging from the rest — whether it grew one or was born with one.
 
 1. Inline the abstraction back into each caller — copy the code down.
 2. Delete the emptied abstraction.
