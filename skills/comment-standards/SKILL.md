@@ -1,75 +1,41 @@
 ---
 name: comment-standards
-description: A comment needs a receipt and an anchor. Use when writing a comment, reviewing the comments in a diff, or finishing an edit that changed code around existing comments — and when another skill needs the bar for keeping a comment.
+description: A comment earns its place only if it is load-bearing — it carries a fact the repo can't recover and that you can defend from the repo alone. Delete comments derivable from the code, or that you can't stand behind. Use when writing a comment, reviewing or cleaning up the comments in a diff, or deciding whether a comment should stay — and when another skill needs the bar for keeping a comment.
 ---
 
-A comment needs a **receipt** and an **anchor**.
+# Load-bearing comments
 
-The **receipt** is a source outside the code: an incident, a ticket, a spec or vendor behaviour, a measurement, an approach that was tried and failed. The **anchor** is what in this code the comment is about: a line, a branch, or an absence it names outright. Missing either one, delete it.
+The default for a comment is **deletion**. A comment earns its place only by being **load-bearing**: delete it and a fact the reader cannot recover from the repo is lost. Writing or reviewing a comment, run it through two gates — it survives only if it passes **both**.
 
-Has both:
+## Gate 1 — Derivable?
 
-```
-// Stripe returns 200 with an error body here (STRIPE-4412)
-// Sorted before hashing — unsorted order broke cache keys in prod, Mar 3
-// Sequential on purpose: batching this hit the 100-row API limit
-// No locking needed — single-threaded caller
-```
+If a reader can recover the fact by reading the repo — the code, its tests, its docs, across as many files as it takes — the comment is derivable. Delete it.
 
-No receipt:
+"I could confirm this by reading another file" is a reason to delete, not to keep: the codebase already carries the fact. This retires narration of the adjacent line, restatements of the types, and cross-file notes the code already spells out.
 
-```
-// use a map for O(1) lookup
-// increment the counter
-// validate input before processing
-```
+## Gate 2 — Defensible?
 
-The receipt is what the next reader could not have recovered by reading the repo. A reason they could have worked out themselves is narration with a reason attached.
+Keep a comment only if you can stand behind every word of it from the repo alone. If it asserts anything the repo cannot confirm — the behavior of a system outside the code, a citation you cannot check, an intention no one recorded — delete it.
 
-## Orphans
+When a comment is almost-right and needs a caveat to become true, delete it rather than maintain it. A comment you keep having to clarify is a liability, and a wrong comment costs more than a missing one.
 
-An **orphan** has a receipt but no anchor: the approach changed, the branch is gone, the workaround was replaced, and the comment stayed. The reader believes it and hunts for code that isn't there.
+## What survives
 
-So whenever you change code, re-read every comment in the blocks you touched — including the ones you didn't edit, which is where orphans live. Delete an orphan in the same diff as the code it described. Where it's tempting to soften one until it's vaguely true, delete it: that leaves an orphan with a weaker receipt.
+Two narrow kinds:
 
-Scope this to the blocks you changed.
+- **Pointers to rationale that lives outside the code** — a decision record, an ADR, a ticket, a `TODO(owner)`. The code cannot carry *why*; the pointer can. Keep the pointer, not a paraphrase of what it says.
+- **Declarations, not prose** — a type annotation, an interface doc that answers to the signature, a machine-read directive like a lint suppression with its reason. These do work; they do not explain.
 
-## Interface docs
+Everything else starts guilty.
 
-Exported functions, types, public API. The audience is a caller who will never read the body, so these owe no receipt and no anchor — they answer to the signature: units, ownership, error and nil behaviour, whether it blocks, whether it mutates. Keep them.
+## Anti-patterns
 
-Match the surrounding density. Where a file documents its exports, write one.
+Each is a comment that fails a gate — recognize the shape and delete on sight:
 
-A doc comment restating the signature in prose is narration. Delete it.
+- **Narration** — restates what the next line does. Derivable.
+- **Invented authority** — a fabricated issue number, chat-room id, or environment specific that reads as grounded but matches nothing in the repo. Indefensible.
+- **Foreign-system claims** — asserts how a backend, API, or external service behaves. The repo cannot confirm it.
+- **False premise** — the reason it gives is wrong: the code guards a case that cannot occur, or cites a constraint that does not hold. Worse than silence.
+- **Orphan** — the code it described moved or died, and the comment stayed pointing at what isn't there. When you change code, re-read every comment in the blocks you touched and delete the ones the change stranded.
 
-## Pointers
-
-Keep these on sight — they point somewhere rather than explain:
-
-- `// TODO(owner): what, + ticket` — with an owner
-- `// keep in sync with <file>` — a coupling the compiler won't catch
-- `// eslint-disable-next-line <rule> — reason` — a suppression justifies itself
-- Links to an RFC, ADR, or upstream issue
-
-## Delete on sight
-
-- Commented-out code — git has it
-- Changelog comments (`// added 2024-03`, `// was: foo`)
-- Section banners
-- A comment narrating the diff rather than the code
-
-## Style
-
-One line where possible, naming the specific thing: the vendor, the ticket, the failure, the date. A comment needing a paragraph of cross-component causality belongs in an ADR; link it.
-
-Where a rename would carry the comment, rename. Leave working code alone otherwise — deleting the comment is the cheaper fix.
-
-## The pass
-
-Every comment in the diff, and every comment in the blocks you touched:
-
-1. **Anchor?** Point at the line, branch, or named absence. Nothing to point at → delete.
-2. **Receipt?** Name the source outside the code. Nothing to name → delete.
-3. **Pointer or interface doc?** Keep.
-
-Done when every comment has hit one of the three.
+When a comment tempts you, the fix is usually the code: name the variable, split the function, add the type — make the fact derivable, then delete the comment.
