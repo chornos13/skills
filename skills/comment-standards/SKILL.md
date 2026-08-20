@@ -1,41 +1,40 @@
 ---
 name: comment-standards
-description: A comment earns its place only if it is load-bearing — it carries a fact the repo can't recover and that you can defend from the repo alone. Delete comments derivable from the code, or that you can't stand behind. Use when writing a comment, reviewing or cleaning up the comments in a diff, or deciding whether a comment should stay — and when another skill needs the bar for keeping a comment.
+description: Enforce self-documenting code structure and restrict inline comments to durable, globally resolvable external context (ADRs, specs, third-party workarounds). Use when writing, refactoring, or reviewing code.
 ---
 
-# Load-bearing comments
+# Comment Standards
 
-The default for a comment is **deletion**. A comment earns its place only by being **load-bearing**: delete it and a fact the reader cannot recover from the repo is lost. Writing or reviewing a comment, run it through two gates — it survives only if it passes **both**.
+Express program intent through standard syntax, domain-driven naming, and explicit type abstraction. Code syntax expresses the *what* and *how*; comments are reserved exclusively for external context (the *why*) that programming language syntax cannot represent.
 
-## Gate 1 — Derivable?
+## Core Rules
 
-If a reader can recover the fact by reading the repo — the code, its tests, its docs, across as many files as it takes — the comment is derivable. Delete it.
+### 1. Domain Naming
+- Anchor variable and function names directly in domain concepts (e.g., `pendingUserRegistrations` instead of `data`, `hasReachedRetryLimit` instead of `flag`).
+- Name functions by their single outcome or side effect (e.g., `calculateApplicableTax` rather than `handleProcess`).
 
-"I could confirm this by reading another file" is a reason to delete, not to keep: the codebase already carries the fact. This retires narration of the adjacent line, restatements of the types, and cross-file notes the code already spells out.
+### 2. Structural Abstraction
+- Extract complex inline logic and boolean conditions into named predicate functions or boolean variables (e.g., `const isEligibleForDiscount = user.isSubscribed && cart.total > 50;`).
+- Sequence multi-step pipelines into single-purpose helper functions so primary functions read as high-level operational summaries.
 
-## Gate 2 — Defensible?
+### 3. Explicit Types and Guards
+- Leverage strict type systems, custom types, and enums to eliminate impossible state combinations at compile time.
+- Use explicit guard clauses and assertions to enforce invariants programmatically rather than documenting assumptions in prose.
 
-Keep a comment only if you can stand behind every word of it from the repo alone. If it asserts anything the repo cannot confirm — the behavior of a system outside the code, a citation you cannot check, an intention no one recorded — delete it.
+## The External Context Boundary
 
-When a comment is almost-right and needs a caveat to become true, delete it rather than maintain it. A comment you keep having to clarify is a liability, and a wrong comment costs more than a missing one.
+Attach text comments **only** when operational context exists outside codebase syntax. Every comment must satisfy both requirements:
 
-## What survives
+1. **Category Match**: Belongs exclusively to one of these cases:
+   - **Third-Party Workarounds**: Explaining non-standard logic required by external API bugs or hardware constraints.
+   - **Legal or Regulatory Mandates**: Referencing specific compliance rules that dictate unintuitive thresholds.
+   - **Mathematical / Algorithmic Trade-offs**: Documenting non-obvious performance choices.
+   - **Canonical Pointers**: Referencing external specifications, standards, Architecture Decision Records (ADRs), or durable issue-tracking systems.
 
-Two narrow kinds:
+2. **Global Resolvability**: References must be **durable and globally accessible** to any developer (e.g., persistent issue links, public RFCs, vendor documentation, or repository-tracked relative paths like `docs/adr/0014-event-deduplication.md`). Exclude transient session context, workspace-bound state, local notes, or temporary scratchpads (`.scratch`).
 
-- **Pointers to rationale that lives outside the code** — a decision record, an ADR, a ticket, a `TODO(owner)`. The code cannot carry *why*; the pointer can. Keep the pointer, not a paraphrase of what it says.
-- **Declarations, not prose** — a type annotation, an interface doc that answers to the signature, a machine-read directive like a lint suppression with its reason. These do work; they do not explain.
+## Completion Criteria
 
-Everything else starts guilty.
-
-## Anti-patterns
-
-Each is a comment that fails a gate — recognize the shape and delete on sight:
-
-- **Narration** — restates what the next line does. Derivable.
-- **Invented authority** — a fabricated issue number, chat-room id, or environment specific that reads as grounded but matches nothing in the repo. Indefensible.
-- **Foreign-system claims** — asserts how a backend, API, or external service behaves. The repo cannot confirm it.
-- **False premise** — the reason it gives is wrong: the code guards a case that cannot occur, or cites a constraint that does not hold. Worse than silence.
-- **Orphan** — the code it described moved or died, and the comment stayed pointing at what isn't there. When you change code, re-read every comment in the blocks you touched and delete the ones the change stranded.
-
-When a comment tempts you, the fix is usually the code: name the variable, split the function, add the type — make the fact derivable, then delete the comment.
+- All variables, functions, and modules state their intent through domain naming and explicit type bounds.
+- Conditional branches are self-describing via extracted boolean variables or predicates.
+- Every remaining comment matches a defined boundary category and resolves to a durable, globally accessible target.
