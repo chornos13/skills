@@ -1,6 +1,6 @@
 ---
 name: glass-box-poc
-description: Write POC, repro, exploit, or throwaway test scripts as flat top-to-bottom runbooks with raw verbatim output and a replayable curl per request. Use when writing a proof-of-concept, a bug reproduction, an API-probing script, or any throwaway script whose point is to be read and rerun by a human. Also use when the user asks to make a script explicit, verbose, easy to follow, or wants raw output.
+description: Write a POC, repro, exploit, or throwaway test script as a flat top-to-bottom runbook with raw verbatim output and a replayable curl per request, read once and rerun by hand. Use for a proof-of-concept, bug repro, or API-probing script, or when asked to make a script explicit, verbose, or raw.
 ---
 
 A POC is a **glass box**: a script whose reader learns everything the script knows by reading it once, top to bottom, and can reproduce the operation by hand. Its job is not to run cleanly — it is to be *followed* and *replayed*. Every rule serves that.
@@ -76,3 +76,24 @@ Glass box:
     print("--- status ---"); print(r.status_code, r.reason)
     print("--- response headers ---"); [print(f"{k}: {v}") for k, v in r.headers.items()]
     print("--- response body ---"); print(r.text)   # verbatim; parse in a later step if needed
+
+## Optional — a navigable HTML report
+
+The glass box above is complete on its own: read it, replay the curl. Nothing below is required. But a long run is easier to *navigate* as a report — collapsible requests, Pretty/Raw bodies, a headers table, per-request status/type/size/timing, and a **live replay** button. It is additive: it never replaces or reshapes the raw stream, and a reader who ignores this section loses nothing.
+
+Two extra steps, and the runbook above is otherwise unchanged:
+
+1. **Also append one JSON line per request** to `poc.jsonl`, alongside the raw echo you already print — one object per exchange, wire values verbatim:
+
+       {"label":"get a token","method":"POST","url":"https://api.example.com/oauth/token",
+        "headers":{"Content-Type":"application/x-www-form-urlencoded"},"body":"grant_type=password&…",
+        "response":{"status":200,"statusText":"OK","headers":{"content-type":"application/json"},"body":"…"}}
+
+2. **Run the shipped tool** — a fixed script next to this skill; never regenerate it or hand-write HTML:
+
+       node serve.mjs poc.jsonl        # → http://127.0.0.1:8732/  (optional 2nd arg = port)
+
+`serve.mjs` reads the jsonl and renders the report. Because it re-fires each recorded request **server-side**, the replay is a real call — no CORS fake.
+
+- **Replay is a diff, not a guarantee.** "Replay live" re-runs the request now and shows the fresh response *beside* the recorded one, flagging whether status and body still match. It is honest re-execution, never a claim that the response is deterministic.
+- **Same secrets rule, louder.** The jsonl and every live replay carry the tokens from "Handle the secrets you just printed." The server binds `127.0.0.1` only — never expose it, never commit `poc.jsonl`.
