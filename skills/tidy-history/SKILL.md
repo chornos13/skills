@@ -89,6 +89,6 @@ Wait for an explicit go on one named plan. Then:
 
 It refuses if the branch moved since the dry-run, the tree is dirty, or the result differs from the original. Otherwise it saves a backup ref under `refs/tidy-history/`, moves the branch, verifies the tree against the backup, and removes the worktree. Relay its `VERIFIED` or `MISMATCH` line verbatim. Undo is `git reset --hard <backup ref>`.
 
-Publishing a rewritten branch that was already pushed takes `git push --force-with-lease`. That is an outward-facing step the user runs or approves separately.
+Its closing `NOTE` says how to publish: a plain `git push` when the upstream is an ancestor, `git push --force-with-lease` when the push would rewrite it. Publishing is an outward-facing step the user approves separately; a force push that would replace another author's commits goes to that author first.
 
 The rewritten commits are unsigned. If the repository requires signed commits, say so, and re-sign with `git rebase --exec 'git commit --amend --no-edit -S' <base>` after the user approves.

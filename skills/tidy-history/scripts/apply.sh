@@ -13,5 +13,9 @@ echo "APPLIED: $branch -> $(git rev-parse --short HEAD); backup at $backup"
 if [ -z "$(git diff "$backup" HEAD)" ]; then echo "VERIFIED: tree identical to the original; no code lost"; else echo "MISMATCH: see git diff $backup HEAD"; exit 2; fi
 [ -z "$wt" ] || git worktree remove --force "$wt"
 if up=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null); then
-  echo "NOTE: $branch tracks $up; publishing needs: git push --force-with-lease"
+  if git merge-base --is-ancestor "$up" HEAD; then
+    echo "NOTE: fast-forward of $up; publish with: git push"
+  else
+    echo "NOTE: rewrites $up; publish with: git push --force-with-lease"
+  fi
 fi
