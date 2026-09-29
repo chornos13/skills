@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # Usage: spawn-tickets.sh <ticket-dir>
-# Picks the first backends/*.sh whose `detect` succeeds (or $SPAWN_TICKETS_BACKEND).
+# Picks the first environments/*.sh whose `detect` succeeds (or $SPAWN_TICKETS_ENV).
 set -euo pipefail
 DIR="${1:?usage: spawn-tickets.sh <ticket-dir>}"
 HERE="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" && pwd)"
 
-backend=""
-want="${SPAWN_TICKETS_BACKEND:-*}"
-for b in "$HERE"/backends/*-$want.sh; do
-  if [ -n "${SPAWN_TICKETS_BACKEND:-}" ] || ( source "$b"; detect ); then backend="$b"; break; fi
+env_file=""
+want="${SPAWN_TICKETS_ENV:-*}"
+for e in "$HERE"/environments/*-$want.sh; do
+  if [ -n "${SPAWN_TICKETS_ENV:-}" ] || ( source "$e"; detect ); then env_file="$e"; break; fi
 done
-[ -f "$backend" ] || { echo "spawn-tickets: no backend fits this environment (see $HERE/backends/)" >&2; exit 1; }
-source "$backend"
-echo "spawn-tickets: backend $(basename "$backend" .sh)"
+[ -f "$env_file" ] || { echo "spawn-tickets: no environment detected (see $HERE/environments/)" >&2; exit 1; }
+source "$env_file"
+echo "spawn-tickets: environment $(basename "$env_file" .sh)"
 
 shopt -s nullglob; files=( "$DIR"/*.md ); shopt -u nullglob
 (( ${#files[@]} )) || { echo "spawn-tickets: no *.md in $DIR" >&2; exit 1; }

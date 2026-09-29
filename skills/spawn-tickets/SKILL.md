@@ -18,15 +18,15 @@ It wakes you once — when the stack drains, or when a session exits with its ti
 
 ## Environments
 
-The driver picks the first `scripts/backends/NN-<name>.sh` whose `detect` succeeds (innermost multiplexer first: tmux before Orca); force one with `SPAWN_TICKETS_BACKEND=<name>`. If none fits, the driver says so — tell the user rather than improvising panes by hand.
+The driver picks the first `scripts/environments/NN-<name>.sh` whose `detect` succeeds (innermost multiplexer first: tmux before Orca); force one with `SPAWN_TICKETS_ENV=<name>`. If none is detected, the driver says so — tell the user rather than improvising panes by hand.
 
-Each backend packs two sessions per window/tab (new one, then a side-by-side split) and never closes panes, so every session stays on screen. Panes open without stealing focus.
+Each environment packs two sessions per window/tab (new one, then a side-by-side split) and never closes panes, so every session stays on screen. Panes open without stealing focus.
 
-**Adding an environment** is one new file in `scripts/backends/` defining four functions; the driver owns ordering, done-detection and the stop rule:
+**Adding an environment** is one new file in `scripts/environments/` defining four functions; the driver owns ordering, done-detection and the stop rule:
 
 - `detect` — succeeds when running inside this environment.
 - `open_window <title> <cmd>` — open a new window/tab running `<cmd>`, print its pane id.
 - `split_pane <anchor-pane> <title> <cmd>` — split `<anchor-pane>` side-by-side running `<cmd>`, print the new pane id.
 - `pane_alive <pane>` — succeeds while the pane still exists.
 
-`<cmd>` already `cd`s into the start folder and touches an exit marker when `claude` ends, so a backend only launches and reports liveness.
+`<cmd>` already `cd`s into the start folder and touches an exit marker when `claude` ends, so an environment file only launches and reports liveness.
