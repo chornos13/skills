@@ -16,8 +16,6 @@ split_pane() { # <anchor-pane> <title> <cmd> -> pane id
   _launch "$(tmux split-window -h -d -t "$1" -P -F '#{pane_id}')" "$2" "$3"
 }
 
-pane_alive() { tmux display-message -t "$1" -p '#{pane_id}' >/dev/null 2>&1; }
-
 _launch() {
   tmux select-pane -t "$1" -T "$2"
   tmux send-keys -t "$1" "$3" Enter
