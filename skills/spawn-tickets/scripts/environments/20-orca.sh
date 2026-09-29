@@ -13,7 +13,7 @@ open_window() { # <title> <cmd> -> terminal handle
   return 1
 }
 
-split_pane() { # <anchor-handle> <title> <cmd> -> terminal handle
-  orca terminal split --terminal "$1" --direction horizontal --command "$3" --json \
+split_pane() { # <anchor-handle> <title> <cmd> -> terminal handle (Orca's "vertical" divider = side by side, like tmux -h)
+  orca terminal split --terminal "$1" --direction vertical --command "$3" --json \
     | jq -er '.result.split.handle // empty'
 }
