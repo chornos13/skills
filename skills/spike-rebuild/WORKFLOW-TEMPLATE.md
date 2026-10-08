@@ -10,7 +10,15 @@
 
 ## State
 
-<What is on each target right now: the build installed (branch, base or a probe), signed in or not, loops running. Edit this line every time it changes.>
+Look up what is on each target right now; never copy the answer here.
+
+```bash
+<command that lists connected targets>
+<command that shows the installed build>
+<command that lists running loops>
+```
+
+- <only what no command can tell: who else is using a target, whether it is signed in>
 
 ## Targets
 
@@ -38,7 +46,7 @@
 
 ## Observe
 
-<Where the debug tools live. When they live outside the repo, keep a copy of each script in `<branch-slug>.tools.md` so they can be rebuilt.>
+Debug scripts live in `.spike-rebuild/<branch-slug>.tools/`, committed as they are, and run from there.
 
 - `<tool or command>`: <what it shows and how to read it>
 - App logs: <where they are stored and how to read them, redacting secrets>
@@ -47,17 +55,13 @@
 
 Each scenario makes one state happen on demand. Pass is a sequence of observable events, never a timer.
 
-- **<name>**: lever: `<command>`. Pass: <event → event → event>. Takes about <N> s.
+- **<name>**: lever: `<command>`. Pass: <event → event → event>. Takes about <N> s; list the fastest lever first.
 
 ## Loops
 
 - `<script> <args>`: <what it repeats, what ends it, where the output goes>
 
 <How to stop a loop, and rules such as one loop per target, or stop the loop before reading a capture.>
-
-## Live runs
-
-The user watches a live run on the target. Tell them it is starting, where to look and what to expect before you start it, and use the fastest lever that reaches the scenario.
 
 ## Tests
 
@@ -66,5 +70,5 @@ The user watches a live run on the target. Tell them it is starting, where to lo
 <typecheck command>
 ```
 
-- Conventions: <the repo's test conventions, what may be mocked (only third-party, never the unit under test)>
+- Conventions: <pointer to the repo's test conventions>
 - Flaky: <suite>, <when it flakes>, <how to run it reliably>
