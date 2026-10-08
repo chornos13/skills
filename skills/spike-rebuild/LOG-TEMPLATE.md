@@ -2,7 +2,7 @@
 
 - Spike: `temp/<branch>` @ `<sha>`
 - Base: `<base-branch>` @ `<merge-base-sha>`
-- Run: `<dev server command>` → <url>
+- Testing: [`workflow.md`](workflow.md), [`<branch-slug>.scenarios.md`](<branch-slug>.scenarios.md)
 - Lock: <fast|strict>
 
 **Next:** <one line: the current slice and what we are waiting for>
