@@ -1,6 +1,6 @@
-# Testing <feature>
+# Testing <project>
 
-<One line: the default target every Try runs on (browser, device model + OS, environment) and the data it starts from (URL, account, content id, timestamp), unless a slice says otherwise. Where the bug does not reproduce (for example: not on web).>
+How to test anything in this project, shared by every spike rebuild. Feature-specific scenarios live in each run's `<branch-slug>.scenarios.md`.
 
 ## Cautions
 
@@ -46,22 +46,10 @@ Look up what is on each target right now; never copy the answer here.
 
 ## Observe
 
-Debug scripts live in `.spike-rebuild/<branch-slug>.tools/`, committed as they are, and run from there.
+Debug scripts live in `.spike-rebuild/tools/`, committed as they are, and run from there.
 
 - `<tool or command>`: <what it shows and how to read it>
 - App logs: <where they are stored and how to read them, redacting secrets>
-
-## Scenarios
-
-Each scenario makes one state happen on demand. Pass is a sequence of observable events, never a timer.
-
-- **<name>**: lever: `<command>`. Pass: <event → event → event>. Takes about <N> s; list the fastest lever first.
-
-## Loops
-
-- `<script> <args>`: <what it repeats, what ends it, where the output goes>
-
-<How to stop a loop, and rules such as one loop per target, or stop the loop before reading a capture.>
 
 ## Tests
 

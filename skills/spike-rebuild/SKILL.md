@@ -9,10 +9,13 @@ argument-hint: [base-branch]
 
 The **spike** is a feature the AI already built end to end on the current branch. It is a map, never the merge candidate. This skill parks the spike on `temp/<branch>`, resets the current branch to its base, and rebuilds the feature there as a sequence of **slices**: each slice adds one behavior the user can see in the browser, is built **red → green → refactor**, and lands only after the user **confirms** it there. Every line in the rebuild exists because a red test or a confirmed slice needed it.
 
-The run keeps two files in the repo under `.spike-rebuild/`, named from the branch with `/` replaced by `-`. Both are committed with each slice. Anything decided or explained in conversation and missing from them counts as lost.
+The run keeps its memory in the repo under `.spike-rebuild/`, committed with each slice. Anything decided or explained in conversation and missing from these files counts as lost. Each file is the single source of truth for its part; a fact lives in exactly one of them.
 
-- The **log** (`<branch-slug>.md`, from [`LOG-TEMPLATE.md`](LOG-TEMPLATE.md)) is the single source of truth for progress and for why each decision was made.
-- The **workflow** (`<branch-slug>.workflow.md`, from [`WORKFLOW-TEMPLATE.md`](WORKFLOW-TEMPLATE.md)) is the single source of truth for *how to test*: the targets the Try steps run on, how to build, reach and observe them, the scenarios and loops that make a state happen on demand, the test commands, and the commands that show the current **state** of every target. The user explains a test step once: write it into the workflow the moment they say it or the moment you discover it, so after `/clear` it is a lookup, never a question. A step that changes is edited in place; the workflow always describes the current way. Debug scripts are committed as they are in `<branch-slug>.tools/`, never pasted into markdown.
+- The **log** (`<branch-slug>.md`, the branch name with `/` replaced by `-`, from [`LOG-TEMPLATE.md`](LOG-TEMPLATE.md)): progress, and why each decision was made.
+- The **workflow** (`workflow.md`, from [`WORKFLOW-TEMPLATE.md`](WORKFLOW-TEMPLATE.md)): how to test anything in this project, shared by every run. The targets, how to build, reach and observe them, the test commands, and the commands that show each target's current **state**. Debug scripts are committed as they are in `tools/`, never pasted into markdown.
+- The **scenarios** (`<branch-slug>.scenarios.md`, from [`SCENARIOS-TEMPLATE.md`](SCENARIOS-TEMPLATE.md)): how to test this feature. The target and data its Try steps start from, the scenarios that make a state happen on demand, and the loops that repeat them.
+
+The user explains a test step once: write it into the workflow or the scenarios the moment they say it or the moment you discover it, so after `/clear` it is a lookup, never a question. A step that holds for any feature goes in the workflow; a step for this feature only goes in the scenarios. A step that changes is edited in place; both files always describe the current way.
 
 The **roadmap** is the log's slice table rendered for the user, so they always see the whole path to done:
 
@@ -24,13 +27,13 @@ The **roadmap** is the log's slice table rendered for the user, so they always s
   5. Refresh → data persists
 ```
 
-Write the log, workflow and roadmap in English.
+Write the log, workflow, scenarios and roadmap in English.
 
 ## 0. Resume or start
 
 Look for the current branch's log and for `temp/<branch>`.
 
-- **Log exists**: read the log and the workflow in full, then open with the roadmap and the **Next** line. When the log has open questions, add a recap of at most five lines: the last decision and its reason, and the open questions. Continue at step 3 from the **Next** line, reading only the current slice's Spike code from the spike. Test and run the slice the way the workflow says.
+- **Log exists**: read the log, the workflow and the scenarios in full, then open with the roadmap and the **Next** line. When the log has open questions, add a recap of at most five lines: the last decision and its reason, and the open questions. Continue at step 3 from the **Next** line, reading only the current slice's Spike code from the spike. Test and run the slice the way the workflow and the scenarios say.
 - **No log, `temp/<branch>` exists**: an earlier run parked the spike and stopped before the log was committed. Confirm `HEAD` is at the merge-base of `temp/<branch>` and the base, tell the user, and go to step 2. When `HEAD` is elsewhere, stop and show the user both SHAs; the next move is theirs.
 - **No log, no `temp/<branch>`**: go to step 1.
 
@@ -63,9 +66,9 @@ With the roadmap, ask which **lock** mode the run uses and record it in the log'
 - **fast**: every test is seen red before the code that turns it green.
 - **strict**: also, after green, remove each guard and branch the slice added, one at a time, and see a test go red for each; record the removals in the slice's Decisions.
 
-Create the workflow. Other `.spike-rebuild/*.workflow.md` files from earlier runs hold test setups the user already explained: offer the closest one as the starting point. Fill it until it is **runnable cold**: an agent with only the workflow can start the dev loop, reach the page (or device screen) the Try steps start from, and run the slice's tests. Confirm that by starting the dev loop and running the existing test command from the workflow as written.
+Read the workflow when an earlier run created it; otherwise create it. Create the scenarios. Fill both until they are **runnable cold**: an agent with only these two files can start the dev loop, reach the page (or device screen) the Try steps start from, and run the slice's tests. Confirm that by starting the dev loop and running the existing test command as written.
 
-Commit the log and the workflow. The user's approval of the roadmap authorizes this commit.
+Commit the log, the workflow and the scenarios. The user's approval of the roadmap authorizes this commit.
 
 ## 3. Slice loop
 
@@ -76,13 +79,13 @@ One slice per round:
 3. **Green**: implement only what turns the red test green and makes the Expect true, using the spike as reference. Spike code that a later slice needs waits for that slice.
 4. Check the slice yourself before handing it over: the typecheck and the existing tests pass, and the page loads with no console errors. When browser tools are available, run the Try steps yourself. Show the user the **evidence**: each command you ran with its result, and any screenshot you took. The user's look is spent on judging behavior, never on finding a blank page.
 5. Tell the user the Try and Expect steps, then stop and wait for them to test in the browser.
-6. While the slice is open, every question the user asks about the code, every choice between options, and every place the rebuild departs from the spike goes into the slice's **Decisions** at the moment it happens: what was chosen, why, who chose it (user or AI), and which option lost. Every new or changed way of testing (a command, a device step, a tool, a flag, a caution) goes into the workflow at the same moment.
+6. While the slice is open, every question the user asks about the code, every choice between options, and every place the rebuild departs from the spike goes into the slice's **Decisions** at the moment it happens: what was chosen, why, who chose it (user or AI), and which option lost. Every new or changed way of testing (a command, a device step, a tool, a flag, a caution) goes into the workflow or the scenarios at the same moment.
 7. When the user confirms, **refactor** with the tests green, then run the strict removals when the Lock says so. When the user's confirmation changed the Expect, update the test first and see it red against the old behavior.
-8. Mark the slice `done`, update **Next**, and commit the slice's code, test, log and workflow together. The message names the slice. Confirmation authorizes this commit.
-9. Show the roadmap with the next slice's Expect, and suggest the user run `/clear` and then `/spike-rebuild`, so the next slice starts with a fresh context built from the log and the workflow.
+8. Mark the slice `done`, update **Next**, and commit the slice's code, test, log, workflow and scenarios together. The message names the slice. Confirmation authorizes this commit.
+9. Show the roadmap with the next slice's Expect, and suggest the user run `/clear` and then `/spike-rebuild`, so the next slice starts with a fresh context built from these files.
 
-If the user reports a problem, reproduce it as a red test first, then fix it within the same slice and repeat from 3.4. When the problem only reproduces on a real device or environment the tests cannot reach, record the repro steps in the workflow and the reason in Decisions. When a slice needs a second fix round, it was too big: split it. When a slice turns out too big to confirm in one look, or the work reveals a slice the roadmap is missing, change the roadmap in the log first, show it, then continue.
+If the user reports a problem, reproduce it as a red test first, then fix it within the same slice and repeat from 3.4. When the problem only reproduces on a real device or environment the tests cannot reach, record the repro steps in the scenarios and the reason in Decisions. When a slice needs a second fix round, it was too big: split it. When a slice turns out too big to confirm in one look, or the work reveals a slice the roadmap is missing, change the roadmap in the log first, show it, then continue.
 
 ## 4. Close
 
-Done when every slice is `done`. Diff `temp/<branch>` against the rebuild. Every spike hunk that never landed goes under **Dropped** with its reason. Tell the user what was dropped, ask whether the log stays in the repo or moves into the PR description, whether the workflow stays for the next run, and whether `temp/<branch>` can be deleted.
+Done when every slice is `done`. Diff `temp/<branch>` against the rebuild. Every spike hunk that never landed goes under **Dropped** with its reason. Tell the user what was dropped, ask whether the log and the scenarios stay in the repo or move into the PR description, and whether `temp/<branch>` can be deleted.
