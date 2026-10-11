@@ -55,6 +55,14 @@ A review of a 2-commit branch returned ✅ with "over-engineering 0 flagged". A 
 - **Breaks-without-it for code comes from a mutation, not from reading.** Reading explains why a mechanism exists; only a run shows whether a test guards it. Principle: **mutation testing** (DeMillo, Lipton & Sayward, *Hints on Test Data Selection*, IEEE Computer 1978), recalled.
 - **✅ requires zero open decisions, and the verdict line names what stays inferred.** An unchecked claim no longer hides behind a green verdict.
 
+## Changed again on 2026-10-11, and why
+
+- **Mutation bypasses the mechanism instead of deleting it.** Deleting a new class or function turns tests red on the missing name, which would have let the control-flow exception from the entry above pass as "guarded".
+- **Structural mechanisms are judged by their callers, not by mutation.** A seam earns its place with a second caller or a settled line. Principle: **Rule of Three** (Fowler, *Refactoring*, crediting Don Roberts), recalled.
+- **"Verified" means run** in step 4 too, matching step 5.
+- **A review folder is overwritten only by a review of the same target.** The fixed `<tickets-dir>/review/` path would have overwritten a review of the whole migration with a review of two follow-up commits.
+- **The terminal summary states its scope.** A user read ✅ as "no problems" and asked why `/code-review` still found some.
+
 ## Considered and dropped
 
 - **SmartBear/Cisco "review < 200–400 LOC"**: a vendor whitepaper from one team's data, criticized because LOC doesn't measure complexity.
