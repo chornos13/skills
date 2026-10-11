@@ -13,7 +13,7 @@ if [ -n "$(git rev-list --merges "$base..$orig")" ]; then
 fi
 
 todo=$(mktemp); : > "$todo"; seen=$(mktemp); : > "$seen"
-# A commit built from squashes keeps every squashed message unless a `message` line rewrites it.
+# A squash commit (a pick followed by squashes) keeps every squashed message unless a `message` line rewrites it.
 group=""; squashes=0; rewritten=0; unwritten=""
 close_group() {
   if [ "$squashes" -gt 0 ] && [ "$rewritten" = 0 ]; then unwritten="$unwritten $group"; fi
@@ -71,5 +71,5 @@ git log --reverse --format='  %h %s' "$base..HEAD"
 echo "WORKTREE: $wt"; echo "RESULT: $(git rev-parse HEAD)"; echo "ORIGINAL: $orig"
 [ "$lines" -eq 0 ] || { echo "TREE DIFFERS from original:"; git diff --stat "$orig" HEAD; exit 2; }
 for g in $unwritten; do
-  echo "NOTE: the commit built from $g and its squashes keeps their messages one after another; give it a \`message <file>\`"
+  echo "NOTE: squash commit from $g has no \`message <file>\`: it keeps the squashed messages one after another"
 done
