@@ -49,11 +49,14 @@ pick   <sha>            # comments are allowed
 squash <sha>
 fixup  <sha>            # folds in, drops this message
 subject <conventional commit subject>   # retitles the commit just built; the squashed messages become its body
+message <file>          # replaces the whole message of the commit just built: subject, blank line, body
 ```
 
-Present it to the user as one table: `| # | Group | New commit subject | Made from |`.
+A commit built from squashes gets a `message` file: one subject and one body that tells the combined change as a single account, written fresh from the squashed messages. Pasting them one after another leaves a body that repeats the old subjects and refers to "the commit before this" when that commit is now the same one. A lone `pick` keeps its message.
 
-Done when: every commit appears in the "Made from" column exactly once.
+Present it to the user as one table: `| # | Group | New commit subject | Made from |`, followed by the full message of every commit built from squashes.
+
+Done when: every commit appears in the "Made from" column exactly once, and every commit built from squashes has a `message` the user has read.
 
 ## 4. Dry-run
 
@@ -65,6 +68,7 @@ It checks coverage (every commit above the base, exactly once), replays the plan
 - `CONFLICT` with the commit and files, exit 1: re-plan around it (keep that commit's order) and dry-run again.
 - `TREE DIFFERS` with a diffstat, exit 2: the plan loses or adds code. Find the cause before going on.
 - `PLAN ERROR`, `COVERAGE ERROR` or `REFUSED`, exit 1: fix the plan or the base.
+- `NOTE` after a proven replay names each commit built from squashes that has no `message` line: write its message and dry-run again.
 
 Every conflict, and every size or ordering claim you make to the user, comes from a dry-run output, never from reasoning alone.
 

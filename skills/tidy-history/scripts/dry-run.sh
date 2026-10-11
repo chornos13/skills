@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # dry-run.sh <base> <plan-file> — replay a plan in a throwaway worktree; the branch is never touched.
-# Plan lines: pick|squash|fixup|drop <sha> [comment], or `subject <text>` to retitle the commit just built.
+# Plan lines: pick|squash|fixup|drop <sha> [comment], `subject <text>` to retitle the commit just built,
+# or `message <file>` to replace its whole message (subject and body).
 # Exit: 0 proven (tree identical), 1 plan/coverage/conflict error, 2 replayed but tree differs.
 set -euo pipefail
 base=$(git rev-parse --verify "$1^{commit}"); plan=$2
@@ -12,17 +13,31 @@ if [ -n "$(git rev-list --merges "$base..$orig")" ]; then
 fi
 
 todo=$(mktemp); : > "$todo"; seen=$(mktemp); : > "$seen"
+# A commit built from squashes keeps every squashed message unless a `message` line rewrites it.
+group=""; squashes=0; rewritten=0; unwritten=""
+close_group() {
+  if [ "$squashes" -gt 0 ] && [ "$rewritten" = 0 ]; then unwritten="$unwritten $group"; fi
+  squashes=0; rewritten=0
+}
 while IFS= read -r line || [ -n "$line" ]; do
   case "$line" in
     ''|'#'*) ;;
     subject\ *) printf 'exec %q %q\n' "$here/reword.sh" "${line#subject }" >> "$todo" ;;
+    message\ *)
+      file=$(realpath -e "${line#message }" 2>/dev/null) || { echo "PLAN ERROR: no message file: ${line#message }"; exit 1; }
+      printf 'exec %q %q\n' "$here/message.sh" "$file" >> "$todo"; rewritten=1 ;;
     pick\ *|squash\ *|fixup\ *|drop\ *)
       read -r verb sha _ <<< "$line"
       full=$(git rev-parse --verify -q "$sha^{commit}") || { echo "PLAN ERROR: unknown commit $sha"; exit 1; }
+      case "$verb" in
+        pick) close_group; group=$(git rev-parse --short "$full") ;;
+        squash) squashes=$((squashes + 1)) ;;
+      esac
       echo "$full" >> "$seen"; echo "$verb $full" >> "$todo" ;;
     *) echo "PLAN ERROR: cannot read line: $line"; exit 1 ;;
   esac
 done < "$plan"
+close_group
 
 missing=$(comm -23 <(git rev-list "$base..$orig" | sort) <(sort -u "$seen"))
 extra=$(comm -13 <(git rev-list "$base..$orig" | sort) <(sort -u "$seen"))
@@ -55,3 +70,6 @@ echo "REPLAYED: $(git rev-list --count "$base..HEAD") commits (was $(git rev-lis
 git log --reverse --format='  %h %s' "$base..HEAD"
 echo "WORKTREE: $wt"; echo "RESULT: $(git rev-parse HEAD)"; echo "ORIGINAL: $orig"
 [ "$lines" -eq 0 ] || { echo "TREE DIFFERS from original:"; git diff --stat "$orig" HEAD; exit 2; }
+for g in $unwritten; do
+  echo "NOTE: the commit built from $g and its squashes keeps their messages one after another; give it a \`message <file>\`"
+done
