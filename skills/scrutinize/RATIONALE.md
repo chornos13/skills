@@ -63,6 +63,14 @@ A review of a 2-commit branch returned ✅ with "over-engineering 0 flagged". A 
 - **A review folder is overwritten only by a review of the same target.** The fixed `<tickets-dir>/review/` path would have overwritten a review of the whole migration with a review of two follow-up commits.
 - **The terminal summary states its scope.** A user read ✅ as "no problems" and asked why `/code-review` still found some.
 
+## Added on 2026-10-11: findings.md and recurrence
+
+Every `/clear` followed by a code review turned up new findings, and fixes often patched the place a defect surfaced instead of where it began. A reviewer in a fresh context has no memory, so it cannot notice that a defect keeps coming back.
+
+- **The review folder carries the memory and the rules.** `findings.md` holds every finding with its origin and kind. Its rules sit in the file itself, so any reviewer pointed at the folder (`/code-review`, `/code-review-and-quality`) follows them without its own skill changing.
+- **A recurrence becomes a problem.** Principle: **incident vs problem** (ITIL problem management): a one-off incident may get a workaround; a recurring one is a problem, closed only by removing its root cause. Recalled.
+- **A finding in an unchanged unit is a review gap**, so it improves the reviewer instead of patching the code again.
+
 ## Considered and dropped
 
 - **SmartBear/Cisco "review < 200–400 LOC"**: a vendor whitepaper from one team's data, criticized because LOC doesn't measure complexity.

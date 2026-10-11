@@ -12,6 +12,7 @@ review/
 ├── behavior.md          every observable change, by class, 🔴 first
 ├── over-engineering.md  mechanisms and their breaks-without-it evidence
 ├── decisions.md         blockers and open decisions; picks recorded here
+├── findings.md          findings from any reviewer pointed here; recurrences become problems
 ├── groups/
 │   ├── 01-<outcome>.md  one per group
 │   └── …
@@ -40,6 +41,9 @@ Reviewed: <base>..<tip sha> · <date>
 | Group | Outcome | Behavior | Over-eng. | Provenance |
 |---|---|---|---|---|
 | [G1](groups/01-x.md) | <one sentence> | 🔴1 🟢2 | — | ticket 03 |
+
+## For a reviewer pointed here
+Your scope is the units in [ledger.md](ledger.md), judged against the goal above. Items in [decisions.md](decisions.md) are settled. Record each finding in [findings.md](findings.md), by its rules.
 ```
 
 For a **plan** target, append **Gaps** (what shipping still needs: migration, rollback, who must be told, how success is measured) and a **Premortem** (the plan failed six months from now: the three likeliest causes).
@@ -85,6 +89,23 @@ A 🟢 entry is three lines: who, before → after, and the settled line it impl
 ````
 
 Blockers appear first, with **Fix** in place of A/B. Keep the picks in the file across runs: they make up the settled list for the next run.
+
+## findings.md
+
+Written empty by scrutinize, filled by any reviewer pointed at the folder, kept across runs. The rules travel with the file, so a reviewer in a fresh context follows them without being told.
+
+```markdown
+# Findings
+
+| ID | Unit | Origin | Kind | Status | Fix |
+|---|---|---|---|---|---|
+
+- **Origin** is the function where the wrong state first arises, not where it surfaces. The fix goes at the origin.
+- **Kind** is a short reusable name for the class of defect ("stale wrapper used", "mechanism no test guards").
+- Before adding a row, match it against every row by origin and by kind. A match with a `fixed` row is a **recurrence**: the earlier fix treated a symptom. Open a **problem** (`P1`, `P2`, …) under the table, listing every row it covers. Its fix starts with one test that goes red on all of them, made at their shared origin.
+- A finding in a unit unchanged since the reviewed tip is a **review gap**: the earlier review missed it. Record it with kind `review gap: <kind>`.
+- Statuses: `open`, `fixed <sha>`, `won't fix` (with the reason). A re-run checks only `open` rows, problems, and units changed since the reviewed tip.
+```
 
 ## groups/NN-<outcome>.md
 
