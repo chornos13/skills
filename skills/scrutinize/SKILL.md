@@ -59,19 +59,22 @@ Prove each 🔴 and 🟠 with a **before/after check**: the same test or script 
 
 ### 5. Find over-engineering
 
-List every **mechanism** the change adds: cache, retry, fallback, config knob, feature flag, abstraction layer, generic parameter, estimate, background job. For each, find the fact that shows what breaks without it: a failing test, an incident, a log, a vendor doc, a settled line. Write `NONE` when no such fact exists.
+List every **mechanism** the change adds: cache, retry, fallback, config knob, feature flag, abstraction layer, generic parameter, estimate, background job, and every new class, function, constant, or exception. Build the list the way you built the ledger: from the script `TARGETS.md` names, so every name it finds is accounted for. Add each **orphan**: code the change leaves in place after removing the last caller that gave it a reason to exist.
+
+For each mechanism, find the fact that shows what breaks without it: a failing test, an incident, a log, a vendor doc, a settled line. For code, the fact comes from a **mutation**: remove the mechanism, run the tests that cover it, and restore it. A test that goes red is the fact. When every test stays green, write `NONE (no test guards it)`; reading the code tells you why it was added, and only the run tells you what guards it. Write `NONE` when no fact exists.
 
 Evidence that only tunes a mechanism (a fitted timeout, a measured rate) is **tuning evidence**. It shows the mechanism is set well, not that it is needed. Record it separately.
 
 Before suggesting removal, state why the mechanism was likely added (Chesterton's fence).
 
-**Done when** every mechanism has breaks-without-it filled, or `NONE`.
+**Done when** every name the script found is on the list, every orphan is on it, and every mechanism has a breaks-without-it (a mutation run, for code) or `NONE`.
 
 ### 6. Gate and decide
 
 - Each 🔴 is a **blocker**. Give the fix. A regression is never offered as an option to accept. The user can still override it explicitly.
 - Each 🟠, and each mechanism with `NONE`, becomes a **decision** with two options: **A** (remove or simplify) and **B** (keep or fix). Each option states the concrete scenario that follows from it and who feels it. Recommend the option the goal and settled sources point to. Where they are silent, recommend the simpler one. Add one plain sentence the user can say when someone asks *why*.
 - Each 🟢, ⚪, and settled item gets one line, no question.
+- The verdict is ✅ only with zero blockers and zero open decisions. Open decisions make it ⚠️.
 - A defect you notice outside the change's units goes under **noticed, out of scope**, one line each. Bug hunting belongs to `/code-review`.
 
 **Done when** every 🔴 has a fix, every decision has A, B, a recommendation, a principle, and a *why* sentence, and nothing settled appears as a decision.

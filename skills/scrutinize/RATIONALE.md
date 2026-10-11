@@ -46,6 +46,15 @@ Earlier runs produced a 116–200 row ledger, ATAM vocabulary, and A/B questions
 - **Bug hunting left to `/code-review`.** Mixing it in made the verdict look unfinished.
 - **"Consider the opposite" on every unit replaced** by the before/after check on 🔴/🟠 and breaks-without-it on mechanisms. Doubt now gets settled by a run, not by an argument.
 
+## Changed on 2026-10-11, and why
+
+A review of a 2-commit branch returned ✅ with "over-engineering 0 flagged". A `/code-review` of the same branch that day found three things the review had missed: a new exception class used only for control flow, a helper orphaned by a removed caller, and a lease-key refresh that the review called "inferred". Deleting the refresh left all 56 tests green, so no test guarded it.
+
+- **The mechanism list is built by a script and reconciled to its count**, as the ledger already was. A list assembled by eye skipped a new class.
+- **Orphans count as mechanisms.** A change that removes the last caller leaves behind code that no longer has a reason to exist.
+- **Breaks-without-it for code comes from a mutation, not from reading.** Reading explains why a mechanism exists; only a run shows whether a test guards it. Principle: **mutation testing** (DeMillo, Lipton & Sayward, *Hints on Test Data Selection*, IEEE Computer 1978), recalled.
+- **✅ requires zero open decisions, and the verdict line names what stays inferred.** An unchecked claim no longer hides behind a green verdict.
+
 ## Considered and dropped
 
 - **SmartBear/Cisco "review < 200–400 LOC"**: a vendor whitepaper from one team's data, criticized because LOC doesn't measure complexity.

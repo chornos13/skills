@@ -31,7 +31,7 @@ Reviewed: <base>..<tip sha> · <date>
 ## Verdict
 <✅ merge | ⛔ blocked by B1, B2 | ⚠️ merge after decisions D1–D3>
 🔴 <n> regressions · 🟠 <n> unapproved · 🟢 <n> intended · ⚪ <n> invisible · over-engineering <n> flagged
-<one line: ledger N/N units reconciled; checks run>
+<one line: ledger N/N units reconciled; mechanisms M/M reconciled; checks and mutations run; inferred: IDs or none>
 
 ## Overview
 <mermaid flowchart, see below>
