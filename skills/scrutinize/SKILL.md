@@ -20,7 +20,7 @@ Identify the target type (code, session, or plan) and read its section in [`TARG
 
 Write the goal in 1–3 sentences, with its source: ticket, spec, issue, PR description, or the session's first request. If you find no goal, ask the user.
 
-Collect the **settled** sources: the tickets, ADRs, and specs the change answers to. If an earlier review folder exists, include its `decisions.md`. A settled choice stays settled. It shows up in the review as *intended* with a link to its source, and it never becomes a question again.
+Collect the **settled** sources: the tickets, ADRs, and specs the change answers to. If an earlier review folder exists, include its `decisions.md` and the `won't fix` rows of its `findings.md`. A settled choice stays settled. It shows up in the review as *intended* with a link to its source, and it never becomes a question again.
 
 **Done when** the goal and the list of settled sources are written at the top of your notes.
 
@@ -93,8 +93,8 @@ Read [`REPORT.md`](REPORT.md) and write the folder it describes. Then print the 
 ## After the report
 
 - **Follow-up questions** get answers. A question doesn't trigger a new finding. If the answer reveals one, ask whether the user wants it added.
-- **Re-runs** read the previous folder's `decisions.md` and the tip it reviewed. They re-check only open blockers, open decisions, and units changed since then.
-- **When the user picks**, apply only the picked options. Each fix starts with a test that goes red. If a fix needs a mechanism outside the picked option, bring it back as a new decision. Update `decisions.md` with each pick. Then run steps 2–6 on your own diff and report what you added.
+- **Re-runs** read the previous folder's `decisions.md`, `findings.md`, and the tip it reviewed. They re-check only open blockers, open decisions, open findings, and units changed since then. Each problem in `findings.md` with no decision becomes one: **A** fix at the origin, **B** keep the per-instance fixes. Two or more review gaps of one kind become a note to improve the reviewer that missed them.
+- **When the user picks**, apply only the picked options. Each fix starts with a test that goes red, and lands at the finding's origin. Mark its `findings.md` row `fixed <sha>`. If a fix needs a mechanism outside the picked option, bring it back as a new decision. Update `decisions.md` with each pick. Then run steps 2–6 on your own diff and report what you added.
 
 ## Stakeholders
 
