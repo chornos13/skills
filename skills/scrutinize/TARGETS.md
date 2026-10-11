@@ -10,7 +10,7 @@ How to build the ledger (step 2) and run before/after checks (step 4) for each t
 - **Provenance:** commit messages and trailers that name tickets. Use `git log --format='%an %s' <range> -- <file>` for the author.
 - **Before/after check:** run the same test or script on the base (in a `git worktree`) and on the tip.
 - **Mechanism list:** the names defined on added lines, e.g. `git diff <range> | grep -E '^\+\s*(class|def|async def|function|const|[A-Z_][A-Z0-9_]* =)'` (fit the pattern to the language). For orphans, take each callee on a removed line and grep its remaining callers.
-- **Mutation:** in a separate `git worktree` of the tip, delete or bypass the mechanism, run the tests that cover its file, then remove the worktree.
+- **Mutation:** in a separate `git worktree` of the tip, bypass the mechanism, run the tests that cover its file, then remove the worktree.
 
 ## Session: an AI session's work
 

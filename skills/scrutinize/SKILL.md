@@ -53,7 +53,7 @@ For each group, ask what an outsider now sees differently. That covers a respons
 | 🟢 **intended** | Observable change a settled source asked for (link the line) | listed, no decision |
 | ⚪ **invisible** | Nothing observable changes (refactor, rename, internal move) | counted only |
 
-Prove each 🔴 and 🟠 with a **before/after check**: the same test or script run on the base and on the tip. If the results differ, the change is proven. Mark each claim **verified** (you ran or read it) or **inferred**. Run only these checks, not the full suite.
+Prove each 🔴 and 🟠 with a **before/after check**: the same test or script run on the base and on the tip. If the results differ, the change is proven. Mark each claim **verified** (you ran it) or **inferred** (you read or reasoned it). Run only these checks, not the full suite.
 
 **Done when** every group has its behavior list (or reads ⚪ invisible), and every 🔴 and 🟠 is verified or marked inferred.
 
@@ -61,13 +61,18 @@ Prove each 🔴 and 🟠 with a **before/after check**: the same test or script 
 
 List every **mechanism** the change adds: cache, retry, fallback, config knob, feature flag, abstraction layer, generic parameter, estimate, background job, and every new class, function, constant, or exception. Build the list the way you built the ledger: from the script `TARGETS.md` names, so every name it finds is accounted for. Add each **orphan**: code the change leaves in place after removing the last caller that gave it a reason to exist.
 
-For each mechanism, find the fact that shows what breaks without it: a failing test, an incident, a log, a vendor doc, a settled line. For code, the fact comes from a **mutation**: remove the mechanism, run the tests that cover it, and restore it. A test that goes red is the fact. When every test stays green, write `NONE (no test guards it)`; reading the code tells you why it was added, and only the run tells you what guards it. Write `NONE` when no fact exists.
+For each mechanism, find the fact that shows what breaks without it: a failing test, an incident, a log, a vendor doc, a settled line. The fact depends on what the mechanism is:
+
+- **Behavior** (cache, retry, fallback, refresh, guard): the fact comes from a **mutation**. Bypass the mechanism so the code still runs without its effect (skip the retry, return the uncached value), then run the tests that cover it. A test that goes red on an assertion is the fact. A red from a missing name, an import, or a type error proves nothing. When every test stays green, write `NONE (no test guards it)`: reading the code tells you why it was added, and only the run tells you what guards it.
+- **Structure** (new class, function, exception, layer, parameter): the fact is a second caller or a settled line that needs the seam. With one caller and no settled line, write `NONE (one caller)`. Inlining it is option A.
+
+Write `NONE` when no fact exists.
 
 Evidence that only tunes a mechanism (a fitted timeout, a measured rate) is **tuning evidence**. It shows the mechanism is set well, not that it is needed. Record it separately.
 
 Before suggesting removal, state why the mechanism was likely added (Chesterton's fence).
 
-**Done when** every name the script found is on the list, every orphan is on it, and every mechanism has a breaks-without-it (a mutation run, for code) or `NONE`.
+**Done when** every name the script found is on the list, every orphan is on it, and every mechanism has a breaks-without-it (a mutation run, for code behavior) or `NONE`.
 
 ### 6. Gate and decide
 

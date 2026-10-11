@@ -4,7 +4,7 @@ What step 7 writes. Overview first, zoom per group, details on demand: each file
 
 ## Location
 
-Put it next to the settled sources when they live in a directory (`<tickets-dir>/review/`). Otherwise use `.scratch/review-<branch-or-topic>/`. If a previous review folder exists there, overwrite it. Its `decisions.md` carries forward, as step 1 read it.
+Put it next to the settled sources when they live in a directory (`<tickets-dir>/review-<branch-or-topic>/`). Otherwise use `.scratch/review-<branch-or-topic>/`. Overwrite a previous folder only when its README names the same target; a folder for another target stays, and its `decisions.md` is read in step 1.
 
 ```
 review/
@@ -137,5 +137,6 @@ B1  end user can no longer open shared files (verified)
 D1  new rate limit on exports: keep? (recommend A)
 D2  retry wrapper with no failure evidence (recommend A)
 Review: <path>/README.md
+Scope: behavior and over-engineering; bugs and style are /code-review's
 Reply with picks, e.g. "B1 fix, D1A, D2B"
 ```
