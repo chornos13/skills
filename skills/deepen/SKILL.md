@@ -16,13 +16,13 @@ A prompt that already names one exact, checkable change (rename this variable, f
 
 ### 1. Ground it
 
-Read enough of the workspace (repo, `.scratch/`, recent commits, the files the prompt names) to know what raw material and tools exist here. A rewrite that names a tool this project lacks becomes a setup gap (step 6), not a requirement.
+Read enough of the workspace (README, build and test config, docs, recent commits, the files the prompt names) to know what raw material and tools exist here. A rewrite that names a tool this project lacks becomes a setup gap (step 6), not a requirement.
 
 **Done when** you can name the project's real data sources, its test/profiling tools, and what the prompt's subject is in this codebase.
 
 ### 2. Altitude: find the outcome
 
-Ask what the task is in service of, and what should happen after it. If the task recurs (fix this crash, why is CI red, review this branch), raise it to the **standing outcome**: keep the app crash-free, keep main green, keep every branch merge-ready.
+Ask what the task is in service of, and what should happen after it. If the task recurs, raise it to the **standing outcome**, the state that makes the task stop coming back: "fix this crash" → keep the crash-free rate above 99.9%; "answer this refund complaint" → keep the top complaint category shrinking each month; "redo the monthly sales report" → surface a drop the week it starts, not at month end.
 
 **Done when** you have one sentence for the outcome, and one for the standing version if the task recurs.
 
