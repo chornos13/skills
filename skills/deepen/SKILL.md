@@ -55,7 +55,7 @@ List the access the model needs and lacks: data, credentials, devices, logs, a r
 
 ## Output
 
-1. The rewritten prompt in one fenced block, ready to paste. It carries the outcome, raw material, methods, target, judge, and borrowed actions. Inside it, every tool, file, or service that step 1 did not find carries the tag `(setup gap)` where it first appears.
+1. The rewritten prompt in one fenced block, ready to paste. It carries the outcome, raw material, methods, target, judge, and borrowed actions.
 2. **What changed**: at most 5 bullets, one per lever used (altitude / depth / range / target / judge).
 3. **Setup gaps** from step 6.
 4. Ask: run the rewrite, the original, or edit first? Then stop.
