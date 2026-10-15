@@ -10,7 +10,7 @@ The standing rules:
 
 - **Facts, not assumptions.** Back each suspected defect with a deterministic test or script you ran. Mark claims **verified** (you ran it) or **inferred** (you read it). Run only the targeted tests, not the full suite.
 - **Fix at the origin.** Use the robust, best-practice solution that removes the cause. A patch over a symptom is not a fix.
-- **Settled stays settled.** A choice that a ticket, ADR, spec, or earlier `decisions.md` already made is out of scope.
+- **Settled stays settled.** A choice that a ticket, ADR, spec, or an earlier review's recorded decision already made is out of scope.
 
 ## Steps
 
@@ -49,6 +49,6 @@ Print:
 - **Blockers**: anything still red, with output.
 - **Decisions**: each with **A** and **B**, the concrete scenario each one leads to and who feels it, your recommendation, and one plain sentence the user can give a collaborator who asks *why*.
 - **Inferred notes**: one line each.
-- Next: `push` to let CI run, or `/scrutinize` for a judgment on behavior impact.
+- Next: `push` to let CI run.
 
 Then stop.
