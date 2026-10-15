@@ -6,8 +6,6 @@ disable-model-invocation: true
 
 The user wrote a prompt at **task level**. Rewrite it at the level a top expert would work at, show the rewrite, and stop. The rewrite asks for a **deeper** version of the task, not a bigger one.
 
-Source: Felix Rieseberg, *How to be more ambitious* (felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/).
-
 ## Steps
 
 ### 1. Ground it
@@ -39,7 +37,7 @@ Restate the deliverable as what it must *do* for the people who receive it ("a d
 
 ### 5. Set the target
 
-Make the goal **specific and hard**: a number, a threshold, a deadline, or a binary pass on the judge (for example "no long task over 50ms during category navigation on LG 2017" rather than "improve performance"). Choose an ambitious target and state it as solvable.
+Make the goal **specific and hard**: a number, a threshold, a deadline, or a binary pass on the judge (for example "no long task over 50ms during navigation on the slowest supported device" rather than "improve performance"). Choose an ambitious target and state it as solvable.
 
 **Done when** the target is checkable by the judge from step 3.
 
@@ -50,8 +48,6 @@ List the access the model needs and lacks: data, credentials, devices, logs, a r
 **Done when** each gap names what to provide and why the rewrite needs it, or reads "none".
 
 ## Output
-
-Write in the user's language (Indonesian, English, or their mix).
 
 1. The rewritten prompt in one fenced block, ready to paste. It carries the outcome, raw material, methods, target, judge, and borrowed actions.
 2. **What changed**: at most 5 bullets, one per lever used (altitude / depth / range / target / judge).
