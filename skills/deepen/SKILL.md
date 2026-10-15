@@ -8,6 +8,12 @@ The user wrote a prompt at **task level**. Rewrite it at the level a top expert 
 
 ## Steps
 
+### 0. Check it is task level
+
+A prompt that already names one exact, checkable change (rename this variable, fix this typo, run this command) is **already deep**. Say in one line that it needs no rewrite, and stop.
+
+**Done when** the prompt is either declared already deep, or you can say which part of it is left open (outcome, method, target, or judge).
+
 ### 1. Ground it
 
 Read enough of the workspace (repo, `.scratch/`, recent commits, the files the prompt names) to know what raw material and tools exist here. A rewrite that names a tool this project lacks becomes a setup gap (step 6), not a requirement.
@@ -37,15 +43,15 @@ Restate the deliverable as what it must *do* for the people who receive it ("a d
 
 ### 5. Set the target
 
-Make the goal **specific and hard**: a number, a threshold, a deadline, or a binary pass on the judge (for example "no long task over 50ms during navigation on the slowest supported device" rather than "improve performance"). Choose an ambitious target and state it as solvable.
+Make the goal **specific and hard**: a number, a threshold, a deadline, or a binary pass on the judge (for example "no long task over 50ms during navigation on the slowest supported device" rather than "improve performance"). Choose an ambitious target and state it as solvable. Write the number itself: when it depends on a value the workspace lacks, pick a concrete default and list the missing value as a setup gap.
 
-**Done when** the target is checkable by the judge from step 3.
+**Done when** the target is a literal number or pass/fail the judge from step 3 can check.
 
 ### 6. List setup gaps
 
 List the access the model needs and lacks: data, credentials, devices, logs, a reproducible environment. These are what the user changes in their setup so the standing outcome can run more than once.
 
-**Done when** each gap names what to provide and why the rewrite needs it, or reads "none".
+**Done when** every tool, file, and service the rewrite requires is one of: found in step 1, built by the rewrite from what step 1 found, or listed here with what to provide and why.
 
 ## Output
 
