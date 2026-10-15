@@ -42,7 +42,7 @@ Run step 2 on your own fix commits only. Then run what CI runs locally: read the
 
 ## Report
 
-Print, in the user's language:
+Print:
 
 - **Verdict**: ✅ merge-ready, or ⚠️ with the count of blockers and decisions.
 - **Fixed**: one line each: finding → `sha`, verified.
