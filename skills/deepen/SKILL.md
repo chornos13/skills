@@ -1,61 +1,74 @@
 ---
 name: deepen
-description: Rewrite a prompt to be more ambitious (higher altitude, more depth, wider range) before running it. Usage: /deepen <prompt>
+description: Rewrite a prompt at expert depth, grounded in checked facts and verified by independent subagents, before running it. Usage: /deepen <prompt>
 disable-model-invocation: true
 ---
 
-The user wrote a prompt at **task level**. Rewrite it at the level a top expert would work at, show the rewrite, and stop. The rewrite asks for a **deeper** version of the task, not a bigger one.
+The prompt is written at **task level**. Rewrite it at the level a top expert in its field would work at, prove the rewrite is correct with independent subagents, show it, and stop. The rewrite asks for a **deeper** version of the task, not a bigger one: truer facts, rawer material, a real judge, with scope matched to the ask.
+
+Each subagent starts cold. Its prompt carries everything it needs: the original prompt verbatim, the relevant context from this conversation (named entities, earlier findings, corrections already made), and its exact job. A verifier gets the material to check and none of the reasoning that produced it.
 
 ## Steps
 
-### 0. Check it is task level
+### 0. Classify the shape
 
-A prompt that already names one exact, checkable change (rename this variable, fix this typo, run this command) is **already deep**. Say in one line that it needs no rewrite, and stop.
+- **Already deep**: one exact, checkable change (rename this variable, fix this typo, run this command). Say so in one line and stop.
+- **Answer shape**: the deliverable is knowledge or a decision: a question, explanation, summary, analysis, investigation, report, or recommendation. The deliverable stays **the answer**.
+- **Build shape**: the deliverable is a change or an artifact: code, a fix, a configuration, a document, a script, a design.
 
-**Done when** the prompt is either declared already deep, or you can say which part of it is left open (outcome, method, target, or judge).
+**Done when** the shape is named, together with the part of the prompt left open (outcome, method, target, or judge).
 
-### 1. Ground it
+### 1. Gather facts (subagent: fact finder)
 
-Read enough of the workspace (README, build and test config, docs, recent commits, the files the prompt names) to know what raw material and tools exist here. A rewrite that names a tool this project lacks becomes a setup gap (step 6), not a requirement.
+Spawn one subagent to build a **fact sheet**. It resolves every concrete noun in the prompt and its context (each named entity, system, file, version, metric, number, date) to a source it read itself: `file:line`, a command and its output, a dataset row, a URL. It also lists the raw material and instruments available here (datasets, logs, monitoring, tests, profilers, scripts). Each line is one claim plus its source. Anything it cannot resolve is marked **unknown**.
 
-**Done when** you can name the project's real data sources, its test/profiling tools, and what the prompt's subject is in this codebase.
+**Done when** every concrete noun in the prompt has a line on the fact sheet, sourced or marked unknown.
 
-### 2. Altitude: find the outcome
+### 2. Gate the facts (subagent: fact checker)
 
-Ask what the task is in service of, and what should happen after it. If the task recurs, raise it to the **standing outcome**, the state that makes the task stop coming back: "fix this crash" → keep the crash-free rate above 99.9%; "answer this refund complaint" → keep the top complaint category shrinking each month; "redo the monthly sales report" → surface a drop the week it starts, not at month end.
+Spawn a fresh subagent with the fact sheet only. It re-derives each claim from the cited source on its own and marks it **confirmed**, **wrong** (with the correct value), or **unverifiable**. Only confirmed facts pass the gate. Correct the wrong ones from the checker's evidence; unverifiable ones become setup gaps (step 5).
 
-**Done when** you have one sentence for the outcome, and one for the standing version if the task recurs.
+**Done when** every fact sheet line carries a verdict and the sheet carried forward holds only confirmed facts.
 
-### 3. Depth: answer the four questions
+### 3. Draft the rewrite
 
-1. What would a top professional in this field do beyond what was asked?
-2. What is the rawest material they would start from (production data, traces, logs, the device itself, the vendor spec)?
-3. What methods and instruments of the trade would they use: the real ones (profiler, database query, statistical test, held-out data), not a markdown table in the field's vocabulary?
-4. What outside the model and the user verifies correctness: a script, test, trace, or metric the model can rerun itself? This is the **judge**.
+Build the draft only from confirmed facts.
 
-**Done when** each question has a concrete answer that names a specific tool, file, or dataset.
+- **Altitude**: what the task serves. Build shape: if the task recurs, raise it to the **standing outcome**, the state that makes it stop coming back ("fix this crash" → keep the crash-free rate above 99.9%). Answer shape: name the decision the answer feeds.
+- **Depth**: the rawest material (primary data, traces, the system itself, the authoritative spec), the real instruments of the field (profiler, query, statistical test, the domain's own formulas), and the **judge**: a script, test, trace, or recomputation outside the model that the model can rerun.
+- **Range** (build shape): restate the deliverable as what it must *do* for its receivers, borrow one concrete action from each of 2–4 fields whose methods apply, and add one **red team** that tries to break the result.
+- **Target**: a literal number or pass/fail the judge can check, sized to what can be measured with the material found. Answer shape's target: the reader can act on the answer with no follow-up question.
+- **Answer shape deliverable**, in this order: the direct answer in one or two sentences; the supporting facts and numbers, each with its source and derivation; the recommended next action. Depth here goes into the correctness of those facts.
 
-### 4. Range: change the nouns to verbs
+Keep the rewrite as short as the task allows: answer shape within 15 lines, build shape within 40.
 
-Restate the deliverable as what it must *do* for the people who receive it ("a deck" → "get busy people to believe a cause-and-effect story and decide in 30 minutes"). From the verbs, pick 2–4 fields whose *methods* apply, plus one **red team** that tries to break the result. Write each one as actions ("run a game day where a newcomer follows the runbook cold"). Ask for each field's methods; skip personas.
+**Done when** every concrete claim in the draft traces to a confirmed fact, and the target is checkable by the named judge.
 
-**Done when** the deliverable is a verb phrase and each borrowed field contributes one concrete action.
+### 4. Gate the rewrite (subagent: prompt verifier)
 
-### 5. Set the target
+Spawn a fresh subagent with the original prompt, the conversation context from the preamble, the confirmed fact sheet, and the draft. It answers each check with pass/fail and evidence:
 
-Make the goal **specific and hard**: a number, a threshold, a deadline, or a binary pass on the judge (for example "no long task over 50ms during navigation on the slowest supported device" rather than "improve performance"). Choose an ambitious target and state it as solvable. Write the number itself: when it depends on a value the workspace lacks, pick a concrete default and list the missing value as a setup gap.
+1. **Intent**: running the rewrite delivers what the original prompt asked. An answer-shape prompt still ends in the answer.
+2. **Identity**: every entity, system, and topic is the one the prompt and its context refer to.
+3. **Facts**: every concrete claim in the draft is on the confirmed fact sheet.
+4. **Feasibility**: every tool, data source, and access the draft needs exists, or is listed as a setup gap.
+5. **Proportion**: scope matches the ask, and each target comes from something measurable here.
+6. **Clarity**: the intended reader understands the draft and the deliverable it asks for, in the prompt's language and terms.
 
-**Done when** the target is a literal number or pass/fail the judge from step 3 can check.
+Fix every fail and spawn a fresh verifier on the new draft. Stop after two fix rounds and carry any remaining fail into the output.
 
-### 6. List setup gaps
+**Done when** all six checks pass, or two fix rounds have run and the remaining fails are written down.
 
-List the access the model needs and lacks: data, credentials, devices, logs, a reproducible environment. These are what the user changes in their setup so the standing outcome can run more than once.
+### 5. List setup gaps
 
-**Done when** every tool, file, and service the rewrite requires is one of: found in step 1, built by the rewrite from what step 1 found, or listed here with what to provide and why.
+The access the rewrite needs and lacks (data, credentials, devices, logs, a reproducible environment), plus the facts marked unverifiable. For each, state what to provide and why.
+
+**Done when** every requirement in the rewrite is confirmed, built by the rewrite, or listed here.
 
 ## Output
 
-1. The rewritten prompt in one fenced block, ready to paste. It carries the outcome, raw material, methods, target, judge, and borrowed actions.
+1. The rewritten prompt in one fenced block, ready to paste.
 2. **What changed**: at most 5 bullets, one per lever used (altitude / depth / range / target / judge).
-3. **Setup gaps** from step 6.
-4. Ask: run the rewrite, the original, or edit first? Then stop.
+3. **Verification**: one line per check from step 4 with its result, plus the count of facts confirmed, corrected, and unverifiable.
+4. **Setup gaps** from step 5.
+5. Ask: run the rewrite, the original, or edit first? Then stop.
