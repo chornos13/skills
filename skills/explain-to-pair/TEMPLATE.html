@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TITLE: the answer in a few words</title>
+<style>
+  :root { --bg:#fff; --fg:#1b1f24; --mute:#6a737d; --line:#d8dee4; --card:#f6f8fa;
+          --red:#cf222e; --redbg:#ffebe9; --green:#1a7f37; --greenbg:#dafbe1; --grey:#8c959f; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --mute:#8b949e; --line:#30363d; --card:#161b22;
+          --red:#ff7b72; --redbg:#3d1d20; --green:#56d364; --greenbg:#12261e; --grey:#6e7681; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:1000px; margin:0 auto; padding:28px 20px 70px; }
+  h1 { font-size:30px; line-height:1.2; margin:0; letter-spacing:-.01em; }
+  .sub { color:var(--mute); font-size:14px; margin:4px 0 0; }
+  .sub code { font-size:12.5px; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--mute); margin:34px 0 10px; }
+  code { font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; background:var(--card); padding:1px 5px; border-radius:4px; }
+
+  /* 1. chain strip */
+  .chain { display:grid; grid-template-columns:2fr 4fr 3fr; gap:10px; margin-top:18px; }
+  .grp { border:1px solid var(--line); border-radius:12px; padding:8px 10px 10px; }
+  .grp > b { display:block; font-size:12px; color:var(--mute); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { display:flex; flex-direction:column; align-items:center; width:62px; }
+  .chip i { font-style:normal; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-weight:700; background:var(--card); border:2px solid var(--line); }
+  .chip.bug i { background:var(--redbg); border-color:var(--red); color:var(--red); }
+  .chip span { font-size:11.5px; line-height:1.2; text-align:center; margin-top:3px; color:var(--mute); }
+  .chip em { font-style:normal; font-size:11px; font-weight:700; color:var(--green); background:var(--greenbg); border:1px solid var(--green); border-radius:999px; padding:0 7px; margin-top:5px; }
+  .legend { font-size:12.5px; color:var(--mute); margin-top:8px; }
+  .legend b.r { color:var(--red); } .legend b.g { color:var(--green); }
+
+  /* 2. code panels (always dark: "this is code" in one glance) */
+  .fixgrid { display:grid; grid-template-columns:1fr; gap:14px; }
+  .fix { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .fix header { display:flex; gap:10px; align-items:baseline; padding:9px 14px; background:var(--card); border-bottom:1px solid var(--line); }
+  .fix header b { font-size:15px; }
+  .fix header .tag { margin-left:auto; font-size:12px; font-weight:700; color:var(--green); background:var(--greenbg); border:1px solid var(--green); border-radius:999px; padding:0 8px; white-space:nowrap; }
+  .fix p { margin:0; padding:8px 14px 10px; font-size:14.5px; }
+  .code { background:#0d1117; color:#e6edf3; margin:0; font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; overflow-x:auto; }
+  .code .file { display:block; padding:5px 14px; background:#161b22; color:#8b949e; font-size:12px; border-top:1px solid #30363d; border-bottom:1px solid #30363d; }
+  .code .ln { display:block; padding:0 14px 0 34px; white-space:pre; position:relative; }
+  .code .ln::before { position:absolute; left:14px; color:#6e7681; content:" "; }
+  .code .ctx { color:#8b949e; }
+  .code .del { background:#3d1d20; color:#ffa198; } .code .del::before { content:"−"; color:#ff7b72; } .code .bad { background:#3d1d20; color:#ffa198; } .code .bad::before { content:"!"; color:#ff7b72; }
+  .code .add { background:#12261e; color:#7ee787; } .code .add::before { content:"+"; color:#56d364; }
+  .code .why { color:#ff7b72; font-style:italic; }
+
+  /* 3. steps 7-8: two-lane timeline */
+  .tl { border:1px solid var(--line); border-radius:12px; padding:12px; overflow-x:auto; }
+  .tl .grid { display:grid; grid-template-columns:150px repeat(5, minmax(110px,1fr)); gap:6px 0; align-items:center; min-width:760px; }
+  .tl .h { font-size:12px; color:var(--mute); text-align:center; padding:0 4px 6px; line-height:1.25; }
+  .tl .h b { display:block; color:var(--fg); font-size:12.5px; }
+  .tl .lane { font-size:13px; font-weight:700; padding-right:8px; }
+  .bar { height:34px; border-radius:6px; display:flex; align-items:center; padding:0 10px; font-size:12.5px; font-weight:600; white-space:nowrap; }
+  .bar.bad { background:var(--redbg); border:2px solid var(--red); color:var(--red); }
+  .bar.good { background:var(--greenbg); border:2px solid var(--green); color:var(--green); }
+  .bar.end { border-top-right-radius:0; border-bottom-right-radius:0; border-right:0; }
+  .x { height:34px; display:grid; place-items:center; background:var(--red); color:#fff; font-weight:800; font-size:12.5px; border-radius:0 6px 6px 0; padding:0 4px; text-align:center; line-height:1.1; }
+  .rule { font-size:14.5px; margin:10px 2px 0; }
+
+  /* 4. folded detail */
+  details { border:1px solid var(--line); border-radius:10px; margin:10px 0; }
+  summary { cursor:pointer; padding:10px 14px; font-weight:600; font-size:14.5px; }
+  summary small { color:var(--mute); font-weight:400; margin-left:6px; }
+  details > div { padding:2px 14px 14px; font-size:14.5px; }
+  table { border-collapse:collapse; width:100%; font-size:13.5px; margin:8px 0; }
+  th, td { border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; }
+  th { background:var(--card); }
+  td.r { color:var(--red); font-weight:600; } td.g { color:var(--green); font-weight:600; }
+  .stp .ctl { display:flex; gap:8px; align-items:center; margin:8px 0; }
+  button { font:inherit; padding:5px 12px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .col { min-width:0; } .col .scr, .col .df { overflow-x:auto; }
+  .col { min-width:0; } .col .scr, .col .df { overflow-x:auto; }
+  .col { min-width:0; } .col .scr, .col .df { overflow-x:auto; }
+  .col { min-width:0; } .col .scr, .col .df { overflow-x:auto; }
+  .col { border:2px solid var(--line); border-radius:10px; padding:8px 10px; font-size:13.5px; }
+  .col.b { border-color:var(--red); } .col.a { border-color:var(--green); }
+  .col h4 { margin:0 0 4px; font-size:13px; } .col.b h4 { color:var(--red); } .col.a h4 { color:var(--green); }
+  .kv { display:flex; justify-content:space-between; font:12.5px ui-monospace,Menlo,monospace; border-top:1px dashed var(--line); padding:4px 0; }
+  .res { margin-top:4px; padding:4px 8px; border-radius:6px; font-weight:600; min-height:1.4em; }
+  .res.b { background:var(--redbg); color:var(--red); } .res.a { background:var(--greenbg); color:var(--green); }
+  @media (max-width:760px) { .chain { grid-template-columns:1fr; } .cols { grid-template-columns:1fr; } }
+  .know { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px; }
+  .know div { border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:14px; }
+  .know b { display:block; font-size:13px; margin-bottom:2px; }
+  .know span { color:var(--mute); }
+  .ver { font-size:12.5px; color:var(--mute); padding:0 14px 10px; }
+  .ver b { color:var(--green); }
+  .lead { font-size:17px; margin:12px 0 0; max-width:880px; }
+  .for { color:var(--mute); font-size:14px; }
+  table.ev td:first-child { font:12.5px ui-monospace,Menlo,monospace; white-space:nowrap; }
+  table.ev tr.hot td { background:var(--redbg); }
+  .note { font-size:13.5px; color:var(--mute); margin:4px 0; }
+  td.g, td.o { font-weight:400; } td.g { color:var(--fg); } td.g::before { content:"✔ "; color:var(--green); font-weight:700; }
+  td.o { color:var(--fg); } td.o::before { content:"○ "; color:var(--mute); font-weight:700; }
+  .lead2 { font-size:15.5px; max-width:900px; }
+  table.why td:first-child { font-weight:600; }
+/*U-START*/
+  .cx .dh .tr { float:right; color:#8b949e; }
+  table.dt tr.hl td { background:#3a2e05; color:#f2cc60; } table.dt tr.hl td.n { background:#5a4708; color:#f2cc60; }
+  table.dt tr.f td { background:#5c1c22; color:#ffdcd7; } table.dt tr.f td.n { background:#8e2a33; color:#ffdcd7; }
+  .scr { max-height:380px; overflow:auto; }
+  .vd { margin:8px 0 2px; padding:7px 12px; border-radius:6px; font-size:13.5px; border:1px solid #30363d; }
+  .vd.partly { background:#2d2a0e; border-color:#7a6a14; } .vd.no { background:#2a1014; border-color:#8e2a33; } .vd.acc { background:#1b1b2e; border-color:#4b4b8c; }
+  .vd b.lv { text-transform:uppercase; letter-spacing:.04em; margin-right:6px; }
+  .tally { border:1px solid #30363d; border-radius:8px; padding:10px 14px; margin:10px 0; background:#0d1117; color:#c9d1d9; }
+  .tally code { background:#161b22; color:#c9d1d9; padding:1px 6px; border-radius:3px; }
+  .tally td, .tally th { border-color:#30363d !important; }
+  .why-t { border:1px solid #30363d; border-left:4px solid #58a6ff; border-radius:6px; padding:8px 12px; margin:0 0 10px; background:#0d1117; color:#c9d1d9; font-size:14px; }
+  .why-t b { color:#e6edf3; } .why-t p { margin:4px 0; } .why-t code { background:#161b22; color:#c9d1d9; padding:1px 5px; border-radius:3px; }
+  .ev { display:inline-block; font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:10px; margin-right:4px; }
+  .ev.seen { background:#1f6f2c; color:#fff; } .ev.code { background:#1f4f8c; color:#fff; } .ev.test { background:#7a6a14; color:#fff; }
+  .ev-line { font-size:13px; color:#8b949e !important; }
+  .stp .cx { margin:4px 0; } .stp .cap { font-weight:600; margin:2px 0 4px; }
+
+  .df { border:1px solid #30363d; border-radius:6px; margin:6px 0 6px 0; overflow:hidden; background:#0d1117; }
+  .dh { background:#161b22; padding:4px 10px; border-bottom:1px solid #30363d; font-size:12.5px; }
+  table.dt { margin:0; border:0; width:100%; font:12.5px ui-monospace,monospace; border-collapse:collapse; }
+  table.dt td { border:0; padding:0 8px; white-space:pre; vertical-align:top; background:#0d1117; color:#c9d1d9; font-weight:400; }
+  table.dt td.n { width:1%; min-width:34px; text-align:right; color:#6e7681; background:#161b22; user-select:none; }
+  table.dt tr.d td { background:#3d1418; color:#ffa198; } table.dt tr.d td.n { background:#5c1c22; color:#ffa198; }
+  table.dt tr.a td { background:#12361c; color:#7ee787; } table.dt tr.a td.n { background:#1a4d29; color:#7ee787; }
+  table.dt tr.h td { background:#161b22; color:#8b949e; }
+
+  .u { border:1px solid #30363d; border-left:4px solid #3fb950; border-radius:6px; padding:10px 14px; margin:10px 0; background:#0d1117; }
+  .u.none { border-left-color:#f85149; background:#2a1014; }
+  .u { color:#c9d1d9; } .u b, .u .uh { color:#e6edf3; } .u code { background:#161b22; color:#c9d1d9; padding:1px 6px; border-radius:3px; }
+  .uh { font-size:15px; margin-bottom:6px; }
+  .bd { display:inline-block; font-size:12px; font-weight:700; padding:1px 8px; border-radius:10px; margin-right:8px; }
+  .bd.ok { background:#1f6f2c; color:#fff; } .bd.no { background:#b62324; color:#fff; }
+  .ln { margin:3px 0; font-size:13.5px; } .k { display:inline-block; min-width:70px; color:#8b949e; font-weight:600; } .sp { display:inline-block; min-width:70px; }
+  .u code.del { background:#3d1418; color:#ffa198; } .u code.add { background:#12361c; color:#7ee787; }
+  pre.out { margin:4px 0 4px 0; padding:6px 10px; background:#161b22; color:#c9d1d9; font-size:12.5px; white-space:pre-wrap; word-break:break-all; border-radius:4px; }
+  a.ref { color:#58a6ff; font-family:ui-monospace,monospace; font-size:13px; text-decoration:none; border-bottom:1px dotted #58a6ff; }
+  .u details { margin:2px 0 0 74px; font-size:12.5px; color:#8b949e; } .u ul { margin:4px 0; padding-left:18px; }
+/*U-END*/</style>
+<style>.copyrow{display:flex;gap:10px;align-items:center;margin:6px 0}.copyrow span{width:230px;font-size:13px;color:#555}.copyrow code{flex:1;background:#0d1117;color:#e6edf3;padding:6px 10px;border-radius:6px;white-space:normal;word-break:break-all}.copyrow button{padding:6px 14px;border:1px solid #888;border-radius:6px;background:#2f81f7;color:#fff;font-weight:600;cursor:pointer}
+.st{background:#0d1117;border:1px solid #30363d;border-radius:8px;margin:6px 0;display:flex;overflow:hidden}.st .no{background:#161b22;color:#e6edf3;width:42px;display:flex;align-items:center;justify-content:center;font-weight:700}.st .bd{padding:8px 12px;flex:1}.st .tt{font-weight:700;color:#e6edf3}.st .tm{color:#8b949e;font-weight:400;margin-left:8px;font-size:12px}.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px}.seen{background:#12261e;color:#7ee787;border:1px solid #3fb950}.nots{background:#3d1d20;color:#ffa198;border:1px solid #f85149}.st .hw{margin-top:3px;font-size:14px;color:#cfe0f5}.st .wy{margin-top:3px;font-size:13px;color:#8b949e}.stnot{border-color:#f85149}.verd{padding:10px 14px;border-radius:6px;font-weight:700;margin:8px 0}.vok{background:#12261e;border:1px solid #3fb950;color:#7ee787}.vbad{background:#3d1d20;border:1px solid #f85149;color:#ffa198}</style>
+</head><body>
+<!--
+TEMPLATE for explain-to-pair. Copy this file, replace every CAPITALISED placeholder and the invented checkout example with the real thing.
+Keep the class names: the CSS above styles them. Delete a section only if SKILL.md says it does not apply.
+Never retype run output or diffs: paste them from the real run and the real `git diff -U3`.
+-->
+<main>
+<h1>ANSWER AS A TITLE (what is wrong, for whom)</h1>
+<p class="sub">ERROR / SYMPTOM <code>CODE</code> · issue REF · code from <code>OLD_SHA</code> (before) → <code>FIXED_SHA</code> (after)</p>
+<p class="lead">ONE SENTENCE: what is wrong or changes, in the codebase's own names. <span class="for">For: WHO READS THIS.</span></p>
+
+<h2>What you need to know</h2>
+<div class="know">
+  <div><b>TERM</b><span>One line, in the words the code uses: <code>identifier</code>.</span></div>
+  <div><b>TERM</b><span>One line.</span></div>
+  <div><b>TERM</b><span>One line.</span></div>
+</div>
+
+<h2>What happens</h2>
+<div class="chain">
+  <div class="grp"><b>PLACE 1</b><div class="chips">
+    <div class="chip"><i>1</i><span>user applies a coupon</span></div>
+    <div class="chip"><i>2</i><span>coupon service answers after 6 s</span></div></div></div>
+  <div class="grp"><b>PLACE 2</b><div class="chips">
+    <div class="chip"><i>3</i><span>cart times out at 3 s, saves without coupon</span><em>fix ↓</em></div>
+    <div class="chip"><i>4</i><span>payment rejects the cart</span></div></div></div>
+  <div class="grp"><b>PLACE 3</b><div class="chips">
+    <div class="chip bug"><i>5</i><span>user sees the 500 page</span></div></div></div>
+</div>
+<p class="legend"><b class="r">Red</b> = where the user sees it break · <b class="g">green</b> = where each fix cuts the chain.</p>
+
+<h2>One real event: EVENT ID</h2>
+<table class="ev">
+  <tr><th>Time</th><th>Breadcrumb</th><th>Step</th></tr>
+  <tr><td>12:22:15.852</td><td><code>REAL LOG LINE</code></td><td>② step it confirms</td></tr>
+  <tr class="hot"><td>12:22:38.558</td><td><code>REAL LOG LINE</code></td><td>⑤ where the user sees it</td></tr>
+</table>
+<p class="note">Label each step: seen in a log, read from code, or shown only by a test. Say where the real event does not confirm a step.</p>
+
+<h2>Root cause</h2>
+<table class="why">
+  <tr><th>Why</th><th>Because</th><th>Evidence</th><th>Fix that cuts it</th></tr>
+  <tr><td>1. The user sees a 500</td><td>payment rejects the cart</td><td><a class="ref" href="vscode://file/ABS/PATH/payment.ts:40">payment.ts:40</a> at OLD_SHA</td><td>none, a symptom</td></tr>
+  <tr><td>2. The cart has no coupon</td><td>the cart service timed out first</td><td>log line, test name</td><td><code>couponTimeout</code></td></tr>
+</table>
+<p class="lead2">Class of defect: NAME IT, so the next one is recognised on sight.</p>
+
+<h2>The lines that matter</h2>
+<div class="fixgrid"><div class="fix">
+  <header><b>FIX NAME</b><span class="tag">cuts step 3</span></header>
+  <p>One sentence: what this line stops.</p>
+  <div class="code"><span class="file">src/cart/cart-service.ts at FIXED_SHA</span>
+<span class="ln bad">const couponTimeout = Infinity;</span>
+<span class="ln add">const couponTimeout = 3000;</span>
+<span class="ln ctx">await withTimeout(coupon.fetch(), couponTimeout);</span></div>
+</div></div>
+
+<h2>If you remove it: do it yourself</h2>
+<div class="u">
+  <div class="uh"><span class="bd ok">1 of 41 red</span> <b>UNIT NAME (why N)</b></div>
+  <div class="ln"><span class="k">1. Edit</span> revert this part of the fix (red = the fix line you take out)</div>
+  <div class="df"><div class="dh"><a class="ref" href="vscode://file/ABS/PATH/cart-service.ts:12">src/cart/cart-service.ts</a></div>
+    <table class="dt"><tr class="h"><td colspan="3">@@ -12,3 +12,3 @@</td></tr>
+    <tr class="d"><td class="n">12</td><td class="n"></td><td>-const couponTimeout = 3000;</td></tr>
+    <tr class="a"><td class="n"></td><td class="n">12</td><td>+const couponTimeout = Infinity;</td></tr></table></div>
+  <div class="ln"><span class="k">2. Run</span> <code>COMMAND WITH ABSOLUTE PATHS</code></div>
+  <pre class="out">FIRST LINES OF THE REAL FAILURE OUTPUT</pre>
+  <div class="ln"><span class="k">3. Verdict</span> does this test guard what the user sees? Name the test, what it observes, how resilient it is.</div>
+</div>
+<div class="u none">
+  <div class="uh"><span class="bd no">0 of 41 red</span> <b>UNPROTECTED UNIT</b></div>
+  <div class="ln">No test turns red. Delete the unit, or add a test before keeping it.</div>
+</div>
+
+<h2>Run it: the test on the old and the fixed code</h2>
+<div class="copyrow"><span>1. Start both servers</span><code>sh /ABS/PATH/serve-both.sh start</code><button type="button" onclick="cp(this)">Copy</button></div>
+<div class="copyrow"><span>2. Run on the old code (OLD_SHA)</span><code>sh /ABS/PATH/run-e2e.sh old</code><button type="button" onclick="cp(this)">Copy</button></div>
+<div class="copyrow"><span>3. Run on the fixed code (FIXED_SHA)</span><code>sh /ABS/PATH/run-e2e.sh fixed</code><button type="button" onclick="cp(this)">Copy</button></div>
+<div class="copyrow"><span>Stop both servers</span><code>sh /ABS/PATH/serve-both.sh stop</code><button type="button" onclick="cp(this)">Copy</button></div>
+<p class="note">Each step is <span class="tag seen">seen</span> in the browser or <span class="tag nots">NOT seen</span>. The "why" lines are read from code, not observed. Paste the real run output here, one card per step.</p>
+<div class="st"><div class="no">1</div><div class="bd"><div class="tt">STEP AS IT HAPPENED<span class="tm">+6.7s</span></div><div class="hw"><span class="tag seen">seen</span>WHAT THE RUN SHOWED</div><div class="wy">why (from code): CAUSE OF THIS STEP</div></div></div>
+<div class="st stnot"><div class="no">2</div><div class="bd"><div class="tt">STEP THE RUN DID NOT REACH<span class="tm"></span></div><div class="hw"><span class="tag nots">NOT seen</span>WHAT WAS MISSING</div><div class="wy">why (from code): CAUSE OF THIS STEP</div></div></div>
+<div class="verd vok">OK: VERDICT LINE (or BUG: steps N and M happened)</div>
+<p><b>What this run shows.</b> State plainly whether it reproduced the problem. A run that passes on the old code guards nothing: name the step where the chain stopped and the condition the test did not set up.</p>
+
+<h2>Done, out, open</h2>
+<table>
+  <tr><th>Done when</th><th>Out of scope (reason)</th><th>Open (owner)</th></tr>
+  <tr><td class="g">observable condition 1</td><td class="o">item, because REASON</td><td class="o">question, owner NAME</td></tr>
+</table>
+
+<h2>Your first step</h2>
+<p class="lead2">Which unit would you remove first, and what do you expect to go red?</p>
+
+<details><summary>More detail <small>(optional)</small></summary><div>Folded tables, evidence, glossary.</div></details>
+</main>
+<script>function cp(b){var t=b.previousElementSibling.textContent,a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)}</script>
+</body></html>
