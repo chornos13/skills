@@ -1,6 +1,7 @@
 ---
 name: explain-to-pair
-description: Hand a story, bug or finished change to a pair — a person at the other keyboard, or an AI writing the page. Use when asked to explain your work or a story to a teammate, prepare a review or pairing session, or write up a root cause.
+description: Hand a story, bug or finished change to a pair — a person at the other keyboard, or an AI writing the page — with each unit of code justified, mutation-checked and runnable.
+disable-model-invocation: true
 ---
 
 Goal: after one read, the pair can start, knows what done looks like, and can judge whether each **unit** of the change should exist, with nothing left to ask. The pair knows the codebase but not this item, and has little time.
