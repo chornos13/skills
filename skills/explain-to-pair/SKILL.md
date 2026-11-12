@@ -23,8 +23,12 @@ A **unit** is one piece a reviewer could question: a guard, a flag, a changed si
 
    Report one row per unit. A unit with no red test is a finding.
 4. **Root cause** as a chain of whys, symptom first, evidence per step (Five Whys). Where several defects had to line up, say which layer each fix closes (Swiss cheese); name the class of defect. Done when the reader can point at the fix and the evidence for every why.
-5. **Make the chain runnable**: one test, red on old, green on fixed; for bugs only the real app shows, two running copies plus a browser test. See [RUNNABLE.md](RUNNABLE.md).
-6. **Lay it out** by the rules in [RULES.md](RULES.md): answer first, scannable in one second, minimum context, team words, one real example, done/out/open.
+5. **Run the chain** on old and fixed, in the real application when the change is visible there. This step is never skipped, and a refactor is not an exception: the same user path on both commits shows the behaviour held. Show it as numbered steps, each `seen` or `NOT seen` with its cause labelled as read from code, and a verdict line. Method: [RUNNABLE.md](RUNNABLE.md). Done when the page holds the output of a real run on each commit, or says which commit could not run and why.
+6. **Write one self-contained HTML page**, in this order: answer, what you need to know, chain strip, root cause, the change as real diffs, one card per unit, run section, done / out / open, "how would you start?". Rules in [RULES.md](RULES.md). Look of the page:
+   - Every code block, diff, command and run output sits in a dark monospace panel (`#0d1117` background, light text). Removed rows red, added rows green. A command panel has a Copy button and the full command with absolute paths.
+   - Real run output appears as cards, one per step, from the actual run. Never retype it.
+   - Each path is a link that opens the file at that line.
+   - Open the page in a browser and screenshot it. Done when every code block is dark and every command copies.
 7. **Check** against the list below, then ask the pair "how would you start?" and wait for something you did not say.
 
 ## Before you send it
@@ -35,5 +39,6 @@ A **unit** is one piece a reviewer could question: a guard, a flag, a changed si
 - Every line number names its commit and folder.
 - Every unit has its four answers; the root cause is a chain of whys with the defect class named.
 - The important thing is big and early; extra material is folded.
+- The page has a run on old and on fixed, dark code panels and Copy buttons.
 
 Rationale, sources and the prose-hygiene table: [RULES.md](RULES.md). Failures seen in practice: [FAILURES.md](FAILURES.md).
